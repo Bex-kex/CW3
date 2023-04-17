@@ -44,8 +44,14 @@ def check_section(section, n):
     return False
 
 
-def get_squares(grid, n_loc_rows, n_loc_cols, n_rows, n_cols):
-    squares = []
+def get_squares(grid, n_loc_rows:int, n_loc_cols:int, n_rows:int, n_cols:int):
+    """
+    this function takes the grid, dimensions of the subgrid, 
+    and the dimensions of the main grid, and outputs a nested list, 
+    containing the numbers in each square.
+    
+    """
+    squares:list[list[int]] = []
     row_split = []
     col_split = []
     boundary = 0
