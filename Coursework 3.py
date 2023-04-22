@@ -1,3 +1,5 @@
+import argparse
+import sys
 grid1 = [
     [1, 0, 4, 2],
     [4, 2, 1, 3],
@@ -174,6 +176,7 @@ def recursive_solve(grid, n_loc_rows, n_loc_cols, n_rows, n_cols):
 
     if not empty:
         if check_solution(grid, n_loc_rows, n_loc_cols, n_rows, n_cols):
+            if EXPLAIN:...
             return grid
         else:
             return None
@@ -199,7 +202,43 @@ def recursive_solve(grid, n_loc_rows, n_loc_cols, n_rows, n_cols):
 #       check_solution(grid9, 3, 2, 6, 6),
 #       check_solution(grid10, 3, 2, 6, 6))
 depth = 0
-print(recursive_solve(gridtest, 3, 3, 9, 9))
+
+def main(CLA):
+    #take command-line arguments and parse them into a dict
+    args: dict = vars(parser.parse_args(CLA))
+    print(args)
+    for i in args.keys():
+        #turning dict values into constants to be used in rest of program
+        match i:
+            case 'explain':
+                EXPLAIN: bool = args.get(i)
+            case 'file':
+                FILE_IN: str
+                FILE_OUT: str
+                FILE_IN, FILE_OUT = args.get(i)
+            case 'hint':
+                HINT = int(args.get(i).pop())
+            case 'profile':
+                PROFILE:bool = args.get(i)
+    if FILE_IN:
+        write_to_file(recursive_solve(parsed()))
+    if PROFILE:...  
+    else:
+        print(recursive_solve)
+    
+    
+    #print(recursive_solve(gridtest, 3, 3, 9, 9))
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+
+    #adding args using argparse module
+    parser.add_argument("-e","--explain",action='store_true')
+    parser.add_argument("--file",nargs=2,action='extend')
+    parser.add_argument("--hint",nargs=1,action='store')
+    parser.add_argument("-p","--profile",action='store_true')
+
+    main(sys.argv[1:])
+
 
 
 
