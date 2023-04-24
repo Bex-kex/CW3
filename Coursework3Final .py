@@ -46,7 +46,7 @@ gridtest = [
     [0, 9, 4, 0, 8, 0, 0, 0, 0],
     [0, 0, 3, 7, 0, 8, 4, 0, 9],
     [0, 4, 0, 0, 1, 3, 7, 0, 6],
-    [0, 4, 0, 0, 1, 3, 7, 0, 6]
+    [0, 6, 0, 9, 0, 0, 1, 0, 8]
 ]
 
 
@@ -146,7 +146,10 @@ def find_empty(grid, n_loc_rows, n_loc_cols, n_rows, n_cols):
     return zeros_sorted
 
 
-def get_all(grid, n_loc_rows, n_loc_cols, i, j, n_rows, n_cols):
+def get_all(grid, n_loc_rows, n_loc_cols, i, j, n_rows, n_cols) -> set:
+    """
+
+    """
     row = []
     for k in range(n_cols):
         if grid[i][k] != 0:
@@ -189,7 +192,7 @@ def get_all(grid, n_loc_rows, n_loc_cols, i, j, n_rows, n_cols):
     return set(all_present)
 
 
-def get_possible(grid, n_loc_rows, n_loc_cols, n_rows, n_cols, i, j):
+def get_possible(grid, n_loc_rows, n_loc_cols, n_rows, n_cols, i, j) -> list[int]:
     all_possible = [i for i in range(1, n_rows + 1)]
     all_present = get_all(grid, n_loc_rows, n_loc_cols, i, j, n_rows, n_cols)
     only_suitable = list(set(all_possible) - set(all_present))
@@ -198,73 +201,119 @@ def get_possible(grid, n_loc_rows, n_loc_cols, n_rows, n_cols, i, j):
 
 
 def recursive_solve(grid, n_loc_rows, n_loc_cols, n_rows, n_cols):
+    """
+    MAIN SOLVE FUNCTION 
+    function that is called recursively. 
+    It first checks if there is an empty space to put a number in,
+    then it will replace that space with the first possible value, 
+    then call itsself again to find the next zero.
+    
+    if there are no other possibilities available, it will exit with value of None,
+    and go back to the previous zero and try other values.
+
+    if the top level of recursion (i.e depth 0) returns none, it means that it has 
+    been through every single possibility and there are no valid solutions to the sudoku.
+
+    if the program does not find any zeros (sudoku completely filled), it will check the grid, and if valid it will
+    return the grid back to the top of the recursion stack via {if ans: return ans}
+    
+    
+    """
+    #finding the next empty space, and the possibilities that it can be
     zeros = find_empty(grid, n_rows, n_cols, n_rows, n_cols)
 
+    #if the grid is full already:
     if not zeros:
-        if check_solution(grid, n_loc_rows, n_loc_cols, n_rows, n_cols):
+        if check_solution(grid, n_loc_rows, n_loc_cols, n_rows, n_cols):# checks the grid 
             return grid
+        #if the grid is full but not correct, it has failed and will return None back to the top.
+        
 
-    row, col = zeros[0][0], zeros[0][1]
-    possible_digits = [zeros[0][i] for i in range(3, len(zeros[0]))]
-
+    #define the coordinates of the zero
+    row, col = zeros[0][0], zeros[0][1] 
+    #create a list of possible digits that would be valid in that position
+    possible_digits = [zeros[0][i] for i in range(3, len(zeros[0]))] 
+    
+    #loop through every possible digit and calls function again once it has swapped out the zero.
     for i in possible_digits:
         grid[row][col] = i
         
         ans = recursive_solve(grid, n_loc_rows, n_loc_cols, n_rows, n_cols)
+        #this if statement is only true once the bottom of the recursion depth has been reached AND 
+        #the grid is solved. basically just passes the grid back up the stack.
         if ans:
             return ans
+        #if there were no solutions with the current choice of numbers, then reset the number back to zero,
+        #and try again with a different value.
         grid[row][col] = 0
     
     return None
 
 
-# print(check_solution(grid1, 2, 2, 4, 4), check_solution(grid2, 2, 2, 4, 4), check_solution(grid3, 2, 2, 4, 4),
-#       check_solution(grid4, 2, 2, 4, 4), check_solution(grid5, 3, 3, 9, 9),
-#       check_solution(grid6, 3, 3, 9, 9), check_solution(grid7, 3, 3, 9, 9), check_solution(grid8, 3, 2, 6, 6),
-#       check_solution(grid9, 3, 2, 6, 6),
-#       check_solution(grid10, 3, 2, 6, 6))
-depth = 0
-print(recursive_solve(grid6, 3, 2, 6, 6))
+#print(recursive_solve(grid6, 3, 2, 6, 6))
 
-#  Function to read the grid from a text file
+
 def read_grid_from_file(file_name:str) -> list:
+    """
+    Function to read the grid from a text file    .
+
+    """
     with open(file_name, 'r') as file:
+        #formatting the raw text in order to extract just the numbers.
         grid = [[int(num) for num in line.strip().split(',')] for line in file]
     return grid
 
-#  Function to print the grid in a readable format
+
 def print_grid(grid) -> None:
+    """
+    Function to print the grid to the terminal in a readable format.
+
+    """
     for row in grid:
         print(" ".join(str(cell) for cell in row))
 
 def write_grid_to_file(grid, file_name):
+    """
+    function for writing the solved (or partially solved) sudoku to the text file
+    """
     with open(file_name, 'w') as file:
         for row in grid:
             file.write(" ".join(str(cell) for cell in row) + "\n")
 
 
-
+print(recursive_solve(gridtest,3,3,9,9))
 if __name__ == "__main__":
+    """
+    main function 
+    """
+    
     parser = argparse.ArgumentParser(description="Solve a Sudoku grid from a text file.")
     parser.add_argument('--file', help="The input Sudoku grid file.",nargs=2,action='extend')
     args = vars(parser.parse_args())
     print(args.get('file'))
-    #print( read_grid_from_file(args.get('--file')))
-    input_grid = read_grid_from_file(args.get('file')[0])
-    n_rows = len(input_grid)
-    n_cols = len(input_grid[0])
-    n_loc_rows = n_loc_cols = int(n_rows ** 0.5)
+    #try to open the file if the file argument is given:
+    try:
+        input_grid = read_grid_from_file(args.get('file')[0])
+        n_rows = len(input_grid)
+        n_cols = len(input_grid[0])
+        n_loc_rows = n_loc_cols = int(n_rows ** 0.5)
+        solution = recursive_solve(input_grid, n_loc_rows, n_loc_cols, n_rows, n_cols)
+        if solution:
+            #self explanatory, if the solve function returned the grid instead of None
+            print("Solved Sudoku grid:")
+            print_grid(solution)
+            # Save the solution to a text file
+            output_file_name: str = args.get('file')[1]
+            write_grid_to_file(solution, output_file_name)
+            print(f"Solution saved to file: {output_file_name}")
+        else:
+            print("The provided Sudoku grid has no solution.")
+    except:
+        #if there wasnt a file provided or the program could not find the file:
+        print('improper file name given!')
+    
+    
+    
 
-    solution = recursive_solve(input_grid, n_loc_rows, n_loc_cols, n_rows, n_cols)
 
-    if solution:
-        print("Solved Sudoku grid:")
-        print_grid(solution)
-        # Save the solution to a text file
-        output_file_name:str = args.get('file')[1]
-        write_grid_to_file(solution, output_file_name)
-        print(f"Solution saved to file: {output_file_name}")
-    else:
-        print("The provided Sudoku grid has no solution.")
-
-
+    
