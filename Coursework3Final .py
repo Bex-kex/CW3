@@ -122,7 +122,7 @@ def bubble_sort(any_list):
 
     return any_list
 
-def find_empty(grid, n_rows, n_cols):
+def find_empty(grid, n_loc_rows, n_loc_cols, n_rows, n_cols):
     zeros_outer = []
     zeros_inner = []
     for i in range(n_rows):
