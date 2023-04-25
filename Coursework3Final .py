@@ -214,7 +214,7 @@ def recursive_solve(grid, n_loc_rows, n_loc_cols, n_rows, n_cols):
     if the top level of recursion (i.e depth 0) returns none, it means that it has 
     been through every single possibility and there are no valid solutions to the sudoku.
 
-    if the program does not find any zeros (sudoku completely filled), it will check the grid, and if valid it will
+    if the find_empty() function does not find any zeros (sudoku completely filled), it will check the grid, and if valid it will
     return the grid back to the top of the recursion stack via {if ans: return ans}
     
     
