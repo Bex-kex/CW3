@@ -1,5 +1,5 @@
 import argparse
-
+from SudokuBoard import SudokuBoard
 grid1 = [
     [1, 0, 4, 2],
     [4, 2, 1, 3],
@@ -269,8 +269,11 @@ def print_grid(grid) -> None:
     Function to print the grid to the terminal in a readable format.
 
     """
+    
     for row in grid:
-        print(" ".join(str(cell) for cell in row))
+        print(" | ".join(str(cell) for cell in row))
+        
+        
 
 def write_grid_to_file(grid, file_name):
     """
@@ -281,7 +284,7 @@ def write_grid_to_file(grid, file_name):
             file.write(" ".join(str(cell) for cell in row) + "\n")
 
 
-print(recursive_solve(gridtest,3,3,9,9))
+#print(recursive_solve(gridtest,3,3,9,9))
 if __name__ == "__main__":
     """
     main function 
@@ -290,14 +293,12 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Solve a Sudoku grid from a text file.")
     parser.add_argument('--file', help="The input Sudoku grid file.",nargs=2,action='extend')
     args = vars(parser.parse_args())
-    print(args.get('file'))
+    
     #try to open the file if the file argument is given:
     try:
         input_grid = read_grid_from_file(args.get('file')[0])
-        n_rows = len(input_grid)
-        n_cols = len(input_grid[0])
-        n_loc_rows = n_loc_cols = int(n_rows ** 0.5)
-        solution = recursive_solve(input_grid, n_loc_rows, n_loc_cols, n_rows, n_cols)
+        sudoku = SudokuBoard(input_grid)
+        solution = sudoku.solve(wavefront_mode=False)
         if solution:
             #self explanatory, if the solve function returned the grid instead of None
             print("Solved Sudoku grid:")
