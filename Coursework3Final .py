@@ -1,4 +1,6 @@
 import time
+import argparse
+
 
 easy1 = [
     [9, 0, 6, 0, 0, 1, 0, 4, 0],
@@ -216,7 +218,7 @@ def get_possible(grid, n_loc_rows, n_loc_cols, n_rows, n_cols, i, j) -> list[int
     return only_suitable
 
 
-def recursive_solve(grid, n_loc_rows, n_loc_cols, n_rows, n_cols):
+def recursive_solve(grid, n_loc_rows, n_loc_cols, n_rows, n_cols, explain=False, steps=None):
     """
     MAIN SOLVE FUNCTION 
     function that is called recursively. 
@@ -254,13 +256,19 @@ def recursive_solve(grid, n_loc_rows, n_loc_cols, n_rows, n_cols):
     for i in possible_digits:
         grid[row][col] = i
         
-        ans = recursive_solve(grid, n_loc_rows, n_loc_cols, n_rows, n_cols)
+        if explain and steps is not None:
+            steps.append(f"Place value {i} in position ({row}, {col})")
+
+        ans = recursive_solve(grid, n_loc_rows, n_loc_cols, n_rows, n_cols, explain, steps)
         #this if statement is only true once the bottom of the recursion depth has been reached AND 
         #the grid is solved. basically just passes the grid back up the stack.
         if ans:
             return ans
         #if there were no solutions with the current choice of numbers, then reset the number back to zero,
         #and try again with a different value.
+        if explain and steps is not None:
+            steps.pop()
+
         grid[row][col] = 0
     
     return None
@@ -299,40 +307,55 @@ def write_grid_to_file(grid, file_name):
 
 
 # print(recursive_solve(gridtest,3,3,9,9))
-# if __name__ == "__main__":
-#     """
-#     main function
-#     """
-#
-#     parser = argparse.ArgumentParser(description="Solve a Sudoku grid from a text file.")
-#     parser.add_argument('--file', help="The input Sudoku grid file.",nargs=2,action='extend')
-#     args = vars(parser.parse_args())
-#     print(args.get('file'))
-#     #try to open the file if the file argument is given:
-#     try:
-#         input_grid = read_grid_from_file(args.get('file')[0])
-#         n_rows = len(input_grid)
-#         n_cols = len(input_grid[0])
-#         n_loc_rows = n_loc_cols = int(n_rows ** 0.5)
-#         solution = recursive_solve(input_grid, n_loc_rows, n_loc_cols, n_rows, n_cols)
-#         if solution:
-#             #self explanatory, if the solve function returned the grid instead of None
-#             print("Solved Sudoku grid:")
-#             print_grid(solution)
-#             # Save the solution to a text file
-#             output_file_name: str = args.get('file')[1]
-#             write_grid_to_file(solution, output_file_name)
-#             print(f"Solution saved to file: {output_file_name}")
-#         else:
-#             print("The provided Sudoku grid has no solution.")
-#     except:
-#         #if there wasnt a file provided or the program could not find the file:
-#         print('improper file name given!')
+if __name__ == "__main__":
+    """
+    main function
+    """
 
-start_time = time.time()
-print(recursive_solve(hard1, 3, 3, 9, 9))
-elapsed_time = time.time() - start_time
-print(elapsed_time)
+    parser = argparse.ArgumentParser(description="Solve a Sudoku grid from a text file.")
+    parser.add_argument('--file', help="The input Sudoku grid file.", nargs=2, action='extend')
+    parser.add_argument('--explain', help="Print a set of instructions on how to solve the given Sudoku grid.", action='store_true')
+    args = vars(parser.parse_args())
+
+    try:
+        input_grid = read_grid_from_file(args.get('file')[0])
+        n_rows = len(input_grid)
+        n_cols = len(input_grid[0])
+        n_loc_rows = n_loc_cols = int(n_rows ** 0.5)
+
+        if args.get('explain'):
+            steps = []
+            solution = recursive_solve(input_grid, n_loc_rows, n_loc_cols, n_rows, n_cols, explain=True, steps=steps)
+            if solution:
+                print("Solved Sudoku grid:")
+                print_grid(solution)    
+                print("Instructions for solving the Sudoku grid:")
+                for step in steps:
+                    print(step)
+
+                output_file_name: str = args.get('file')[1]
+                write_grid_to_file(solution, output_file_name)
+                print(f"Solution saved to file: {output_file_name}")
+            else:
+                print("The provided Sudoku grid has no solution.")
+        else:
+            solution = recursive_solve(input_grid, n_loc_rows, n_loc_cols, n_rows, n_cols)
+            if solution:
+                print("Solved Sudoku grid:")
+                print_grid(solution)
+
+                output_file_name: str = args.get('file')[1]
+                write_grid_to_file(solution, output_file_name)
+                print(f"Solution saved to file: {output_file_name}")
+            else:
+                print("The provided Sudoku grid has no solution.")
+    except:
+        print('Improper file name given!')
+
+
+# start_time = time.time()
+# elapsed_time = time.time() - start_time
+# print(elapsed_time)
     
 
 
