@@ -1,7 +1,7 @@
 import time
 import argparse
-
 from copy import deepcopy
+
 easy1 = [
     [9, 0, 6, 0, 0, 1, 0, 4, 0],
     [7, 0, 1, 2, 9, 0, 0, 6, 0],
@@ -66,14 +66,14 @@ med2 = [
     [0, 0, 0, 2, 8, 4, 6, 0, 5]]
 
 
-def check_section(section, n):
+def check_section(section, n) -> bool:
     if len(set(section)) == len(section) and sum(section) == sum([i for i in range(n + 1)]):
         return True
 
     return False
 
 
-def get_squares(grid, n_loc_rows:int, n_loc_cols:int, n_rows:int, n_cols:int):
+def get_squares(grid, n_loc_rows:int, n_loc_cols:int, n_rows:int, n_cols:int) -> list[list[int]]:
     """
     this function takes the grid, dimensions of the subgrid, 
     and the dimensions of the main grid, and outputs a nested list, 
@@ -105,7 +105,7 @@ def get_squares(grid, n_loc_rows:int, n_loc_cols:int, n_rows:int, n_cols:int):
     return squares
 
 
-def check_solution(grid, n_loc_rows, n_loc_cols, n_rows, n_cols):
+def check_solution(grid, n_loc_rows, n_loc_cols, n_rows, n_cols) -> bool:
     n = n_loc_rows * n_loc_cols
     for row in grid:
         if not check_section(row, n):
@@ -128,7 +128,7 @@ def check_solution(grid, n_loc_rows, n_loc_cols, n_rows, n_cols):
     return True
 
 
-def bubble_sort(any_list):
+def bubble_sort(any_list) -> list[int]:
     length = len(any_list)
     for i in range(0, length):
         for j in range(0, length - i - 1):
@@ -140,7 +140,7 @@ def bubble_sort(any_list):
     return any_list
 
 
-def find_empty(grid, n_loc_rows, n_loc_cols, n_rows, n_cols):
+def find_empty(grid, n_loc_rows, n_loc_cols, n_rows, n_cols) -> list[int]:
     zeros_outer = []
     zeros_inner = []
     for i in range(n_rows):
@@ -218,7 +218,8 @@ def get_possible(grid, n_loc_rows, n_loc_cols, n_rows, n_cols, i, j) -> list[int
     return only_suitable
 
 
-def recursive_solve(grid, n_loc_rows, n_loc_cols, n_rows, n_cols, explain=False, steps=None):
+def recursive_solve(grid, n_loc_rows, n_loc_cols,\
+        n_rows, n_cols, explain=False, steps=None) -> list[list[int]] | None:
     """
     MAIN SOLVE FUNCTION 
     function that is called recursively. 
@@ -293,7 +294,7 @@ def read_grid_from_file(file_name:str) -> list:
     return (grid,n_loc_rows,n_loc_cols,n_rows,n_cols)
 
 
-def print_grid(grid,**kwargs) -> None:
+def print_grid(grid,**kwargs) -> str:
     """
     Function to print the grid to the terminal in a readable format.
 
@@ -304,10 +305,11 @@ def print_grid(grid,**kwargs) -> None:
         print('\nEXPLANATION:\n')
         for i in kwargs.get('explainstring'):
             print(i)
+    return 'Finished execution! output printed to terminal.'
 
 
 
-def write_grid_to_file(grid, file_name,**kwargs):
+def write_grid_to_file(grid, file_name,**kwargs) -> str:
     """
     function for writing the solved (or partially solved) sudoku to the text file
     """
@@ -319,6 +321,7 @@ def write_grid_to_file(grid, file_name,**kwargs):
             file.write('\nEXPLANATION:\n')
             for i in kwargs.get('explainstring'):
                 file.write(i+'\n')
+    return f'Finished execution! output saved to {file_name}'
 
 
 
@@ -339,7 +342,7 @@ def generate_hints(unsolved: list,solved: list,hintnum: int) -> list:
     return partially_solved
 
 
-def write_explanation(unsolved,solved):
+def write_explanation(unsolved: list,solved: list) -> list[str]:
     finalstr = []
     for ind_y, i in enumerate(solved):
         for ind_x, j in enumerate(i):
@@ -348,32 +351,42 @@ def write_explanation(unsolved,solved):
     return finalstr
 
 def main(args:dict):
+    """
+    Wrapper function, responsible for handling the command line arguments,
+    and performing the subroutines in the correct combination according to the arguments.
+    """
+    file_in,file_out = args.get('file_provided') if args.get('file_provided') else [None,None]
+    hint: int = int(args.get('doHint')[0]) if args.get('doHint') else None
+    explain: bool = args.get('doExplain') if args.get('doExplain') else False
+    profile: bool = args.get('doProfiling') if args.get('doProfiling') else False
+
+    #try: file_in, file_out = files 
+    #except: file_in = file_out = None
     steps=[]
-    files:list = args.get('file_provided')
-    file_in ,file_out = files if files else None,None
-    hint:int= int(args.get('doHint')[0])
-    
-    
-    explain:bool = args.get('doExplain')
-    profile:bool = args.get('doProfiling')
 
     if file_in:
-        
         #if files have been provided, read it.
+        print(f'Reading grid from {file_in}...')
         grid: tuple = read_grid_from_file(file_in)
         unsolved = deepcopy(grid[0])
         solution = recursive_solve(*grid,explain=explain,steps=steps)
         
     else:
+
+        #if no input file has been provided, just default to a built-in sudoku
+        print(f'WARNING: invalid/none input file has been provided, defaulting to built in grid.')
         unsolved = deepcopy(med2)
         solution = recursive_solve(med2,3,3,9,9,explain=explain,steps=steps)
 
     if hint:
+        #If hints are toggled on
         
+        #generate the partially solved grid according to how many need to be filled in.
         partially_solved_grid = generate_hints(unsolved,solution,hint)
         
         if explain:
              #if hints on and explanation
+             #requires a different explanation function to work properly \(0_0)/
              explanation = write_explanation(unsolved,partially_solved_grid)
              
              if file_out:
@@ -423,8 +436,8 @@ if __name__ == "__main__":
     parser.add_argument('-p','--profile',dest='doProfiling',   \
                         help= 'toggle profiling of the recursive solve algorithm',action='store_true')
                     
-    args:dict = vars(parser.parse_args())
-    main(args)
+    args: dict = vars(parser.parse_args())
+    print(main(args))
 
     
 
