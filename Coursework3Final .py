@@ -314,7 +314,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="Solve a Sudoku grid from a text file.")
     parser.add_argument('--file', help="The input Sudoku grid file.", nargs=2, action='extend')
-    parser.add_argument('--explain', help="Print a set of instructions on how to solve the given Sudoku grid.", action='store_true')
+    parser.add_argument('-explain', help="Print a set of instructions on how to solve the given Sudoku grid.", action='store_true')
     args = vars(parser.parse_args())
 
     try:
