@@ -218,7 +218,7 @@ def get_possible(grid, n_loc_rows, n_loc_cols, n_rows, n_cols, i, j) -> list[int
     return only_suitable
 
 
-def recursive_solve(grid, n_loc_rows, n_loc_cols, n_rows, n_cols):
+def recursive_solve(grid, n_loc_rows, n_loc_cols, n_rows, n_cols, explain=False, steps=None):
     """
     MAIN SOLVE FUNCTION 
     function that is called recursively. 
@@ -256,13 +256,19 @@ def recursive_solve(grid, n_loc_rows, n_loc_cols, n_rows, n_cols):
     for i in possible_digits:
         grid[row][col] = i
         
-        ans = recursive_solve(grid, n_loc_rows, n_loc_cols, n_rows, n_cols)
+        if explain and steps is not None:
+            steps.append(f"Place value {i} in position ({row}, {col})")
+
+        ans = recursive_solve(grid, n_loc_rows, n_loc_cols, n_rows, n_cols, explain, steps)
         #this if statement is only true once the bottom of the recursion depth has been reached AND 
         #the grid is solved. basically just passes the grid back up the stack.
         if ans:
             return ans
         #if there were no solutions with the current choice of numbers, then reset the number back to zero,
         #and try again with a different value.
+        if explain and steps is not None:
+            steps.pop()
+
         grid[row][col] = 0
     
     return None
