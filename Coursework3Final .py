@@ -1,5 +1,7 @@
 import time
+import argparse
 
+from copy import deepcopy
 easy1 = [
     [9, 0, 6, 0, 0, 1, 0, 4, 0],
     [7, 0, 1, 2, 9, 0, 0, 6, 0],
@@ -277,7 +279,12 @@ def read_grid_from_file(file_name:str) -> list:
     with open(file_name, 'r') as file:
         #formatting the raw text in order to extract just the numbers.
         grid = [[int(num) for num in line.strip().split(',')] for line in file]
-    return grid
+        
+    n_rows = len(grid)
+    n_cols = len(grid[0])
+    n_loc_rows = n_loc_cols = int(n_rows ** 0.5)
+    
+    return (grid,n_loc_rows,n_loc_cols,n_rows,n_cols)
 
 
 def print_grid(grid) -> None:
@@ -298,42 +305,114 @@ def write_grid_to_file(grid, file_name):
             file.write(" ".join(str(cell) for cell in row) + "\n")
 
 
-# print(recursive_solve(gridtest,3,3,9,9))
-# if __name__ == "__main__":
-#     """
-#     main function
-#     """
-#
-#     parser = argparse.ArgumentParser(description="Solve a Sudoku grid from a text file.")
-#     parser.add_argument('--file', help="The input Sudoku grid file.",nargs=2,action='extend')
-#     args = vars(parser.parse_args())
-#     print(args.get('file'))
-#     #try to open the file if the file argument is given:
-#     try:
-#         input_grid = read_grid_from_file(args.get('file')[0])
-#         n_rows = len(input_grid)
-#         n_cols = len(input_grid[0])
-#         n_loc_rows = n_loc_cols = int(n_rows ** 0.5)
-#         solution = recursive_solve(input_grid, n_loc_rows, n_loc_cols, n_rows, n_cols)
-#         if solution:
-#             #self explanatory, if the solve function returned the grid instead of None
-#             print("Solved Sudoku grid:")
-#             print_grid(solution)
-#             # Save the solution to a text file
-#             output_file_name: str = args.get('file')[1]
-#             write_grid_to_file(solution, output_file_name)
-#             print(f"Solution saved to file: {output_file_name}")
-#         else:
-#             print("The provided Sudoku grid has no solution.")
-#     except:
-#         #if there wasnt a file provided or the program could not find the file:
-#         print('improper file name given!')
+def generate_hints(unsolved: list,solved: list,hintnum: int) -> list:
 
-start_time = time.time()
-print(recursive_solve(hard1, 3, 3, 9, 9))
-elapsed_time = time.time() - start_time
-print(elapsed_time)
+    partially_solved = deepcopy(unsolved)
+    counter = 0
+
+    for ind,i in enumerate(solved):
+        for ind2,j in enumerate(i):
+            if not(j == unsolved[ind][ind2]) and counter <= hintnum:
+                partially_solved[ind][ind2] = solved[ind][ind2]
+                counter += 1
+
+            else:
+                partially_solved[ind][ind2] = unsolved[ind][ind2]
+
+    return partially_solved
+
+
+def write_explanation(unsolved,solved):
+    finalstr = []
+    for ind_y, i in enumerate(solved):
+        for ind_x, j in enumerate(i):
+            if not unsolved[ind_y][ind_x] == j:
+                finalstr.append(f'put{j} in position{ind_x,ind_y}')
+    return finalstr
+def main(args:dict):
+
+    files:list = args.get('file_provided')
+    file_in = files[0]
+    file_out = files[1]
+    hint:int= int(args.get('doHint')[0])
+    
+    
+    explain:bool = args.get('doExplain')
+    profile:bool = args.get('doProfiling')
+
+    if files:
+        #if files have been provided, read it.
+        grid: tuple = read_grid_from_file(file_in)
+        unsolved = deepcopy(grid[0])
+        solution = recursive_solve(*grid)
+
+    else:
+        unsolved = med2
+        solution = recursive_solve(med2,3,3,9,9)
+
+    if hint:
+        partially_solved_grid = generate_hints(unsolved,solution,hint)
+        
+        if explain:
+             explanation = write_explanation(unsolved,partially_solved_grid)
+             return write_grid_to_file(partially_solved_grid,file_out,explainstring=explanation)
+        else:
+            return write_grid_to_file(partially_solved_grid,file_out)
+    else:
+        if explain:
+            explanation = write_explanation(unsolved,solution)
+            return write_grid_to_file(solution,file_out,explainstring=explanation)
+        
+    
+    
     
 
 
+
+ 
+if __name__ == "__main__":
+    """
+    main function
+    """
+
+    parser = argparse.ArgumentParser(description="Solve a Sudoku grid from a text file, \
+                                     with additional options such as profiling and explaining the solution")
     
+    parser.add_argument('-f','--file',dest='file_provided', \
+                        help= "The input Sudoku grid file.", nargs=2,action='extend')
+    parser.add_argument('-e','--explain',dest='doExplain',     \
+                        help= "Toggles whether an explanation is added",action='store_true')
+    parser.add_argument('-ht','--hint'   ,dest='doHint',        \
+                        help= 'only fill in the grid with x amount of correct values',action='store',nargs=1)
+    parser.add_argument('-p','--profile',dest='doProfiling',   \
+                        help= 'toggle profiling of the recursive solve algorithm',action='store_true')
+                    
+    args:dict = vars(parser.parse_args())
+    main(args)
+
+    #try to open the file if the file argument is given:
+#    try:
+#        input_grid = read_grid_from_file(args.get('file')[0])
+#        n_rows = len(input_grid)
+#        n_cols = len(input_grid[0])
+#        n_loc_rows = n_loc_cols = int(n_rows ** 0.5)
+#        solution = recursive_solve(input_grid, n_loc_rows, n_loc_cols, n_rows, n_cols)
+#        if solution:
+#            #self explanatory, if the solve function returned the grid instead of None
+#            print("Solved Sudoku grid:")
+#            print_grid(solution)
+#            # Save the solution to a text file
+#            output_file_name: str = args.get('file')[1]
+#            write_grid_to_file(solution, output_file_name)
+#            print(f"Solution saved to file: {output_file_name}")
+#        else:
+#            print("The provided Sudoku grid has no solution.")
+#    except:
+#        #if there wasnt a file provided or the program could not find the file:
+#        print('improper file name given!')
+
+
+        
+
+
+        
