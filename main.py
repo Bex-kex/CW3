@@ -1,6 +1,7 @@
 import time
 import argparse
 from copy import deepcopy
+import Profiler
 
 easy1 = [
     [9, 0, 6, 0, 0, 1, 0, 4, 0],
@@ -358,12 +359,12 @@ def main(args:dict):
     file_in,file_out = args.get('file_provided') if args.get('file_provided') else [None,None]
     hint: int = int(args.get('doHint')[0]) if args.get('doHint') else None
     explain: bool = args.get('doExplain') if args.get('doExplain') else False
-    profile: bool = args.get('doProfiling') if args.get('doProfiling') else False
+    profile_source,profile_out = args.get('doProfiling') if args.get('doProfiling') else [None,None]
 
     #try: file_in, file_out = files 
     #except: file_in = file_out = None
     steps=[]
-
+    if profile_source: return Profiler.profilehandler(profile_source,profile_out)
     if file_in:
         #if files have been provided, read it.
         print(f'Reading grid from {file_in}...')
@@ -438,6 +439,7 @@ if __name__ == "__main__":
                     
     args: dict = vars(parser.parse_args())
     print(main(args))
+    
 
     
 
