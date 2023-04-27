@@ -1,43 +1,6 @@
-import argparse
+import time
 
-grid1 = [
-    [1, 0, 4, 2],
-    [4, 2, 1, 3],
-    [2, 1, 3, 4],
-    [3, 4, 2, 1]]
-
-grid2 = [
-    [1, 0, 4, 2],
-    [4, 2, 1, 3],
-    [2, 1, 0, 4],
-    [3, 4, 2, 1]]
-
-grid3 = [
-    [1, 0, 4, 2],
-    [4, 2, 1, 0],
-    [2, 1, 0, 4],
-    [0, 4, 2, 1]]
-
-grid4 = [
-    [1, 0, 4, 2],
-    [0, 2, 1, 0],
-    [2, 1, 0, 4],
-    [0, 4, 2, 1]]
-
-grid5 = [
-    [1, 0, 0, 2],
-    [0, 0, 1, 0],
-    [0, 1, 0, 4],
-    [0, 0, 0, 1]]
-
-grid6 = [
-    [0, 0, 6, 0, 0, 3],
-    [5, 0, 0, 0, 0, 0],
-    [0, 1, 3, 4, 0, 0],
-    [0, 0, 0, 0, 0, 6],
-    [0, 0, 1, 0, 0, 0],
-    [0, 5, 0, 0, 6, 4]]
-gridtest = [
+easy1 = [
     [9, 0, 6, 0, 0, 1, 0, 4, 0],
     [7, 0, 1, 2, 9, 0, 0, 6, 0],
     [4, 0, 2, 8, 0, 6, 3, 0, 0],
@@ -46,8 +9,59 @@ gridtest = [
     [0, 9, 4, 0, 8, 0, 0, 0, 0],
     [0, 0, 3, 7, 0, 8, 4, 0, 9],
     [0, 4, 0, 0, 1, 3, 7, 0, 6],
-    [0, 6, 0, 9, 0, 0, 1, 0, 8]
-]
+    [0, 6, 0, 9, 0, 0, 1, 0, 8]]
+
+easy2 = [
+    [0, 0, 0, 2, 6, 0, 7, 0, 1],
+    [6, 8, 0, 0, 7, 0, 0, 9, 0],
+    [1, 9, 0, 0, 0, 4, 5, 0, 0],
+    [8, 2, 0, 1, 0, 0, 0, 4, 0],
+    [0, 0, 4, 6, 0, 2, 9, 0, 0],
+    [0, 5, 0, 0, 0, 3, 0, 2, 8],
+    [0, 0, 9, 3, 0, 0, 0, 7, 4],
+    [0, 4, 0, 0, 5, 0, 0, 3, 6],
+    [7, 0, 3, 0, 1, 8, 0, 0, 0]]
+
+easy3 = [
+    [0, 3, 0, 4, 0, 0],
+    [0, 0, 5, 6, 0, 3],
+    [0, 0, 0, 1, 0, 0],
+    [0, 1, 0, 3, 0, 5],
+    [0, 6, 4, 0, 3, 1],
+    [0, 0, 1, 0, 4, 6]]
+
+hard1 = [
+    [0, 2, 0, 0, 0, 0, 0, 1, 0],
+    [0, 0, 6, 0, 4, 0, 0, 0, 0],
+    [5, 8, 0, 0, 9, 0, 0, 0, 3],
+    [0, 0, 0, 0, 0, 3, 0, 0, 4],
+    [4, 1, 0, 0, 8, 0, 6, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 9, 5],
+    [2, 0, 0, 0, 1, 0, 0, 8, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 3, 1, 0, 0, 8, 0, 5, 7]]
+
+med1 = [
+    [0, 0, 0, 6, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 5, 0, 1],
+    [3, 6, 9, 0, 8, 0, 4, 0, 0],
+    [0, 0, 0, 0, 0, 6, 8, 0, 0],
+    [0, 0, 0, 1, 3, 0, 0, 0, 9],
+    [4, 0, 5, 0, 0, 9, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 3, 0, 0],
+    [0, 0, 6, 0, 0, 7, 0, 0, 0],
+    [1, 0, 0, 3, 4, 0, 0, 0, 0]]
+
+med2 = [
+    [8, 0, 9, 0, 2, 0, 3, 0, 0],
+    [0, 3, 7, 0, 6, 0, 5, 0, 0],
+    [0, 0, 0, 4, 0, 9, 7, 0, 0],
+    [0, 0, 2, 9, 0, 1, 0, 6, 0],
+    [1, 0, 0, 3, 0, 6, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 1, 0, 3],
+    [7, 0, 0, 0, 0, 0, 0, 0, 8],
+    [5, 0, 0, 0, 0, 0, 0, 1, 4],
+    [0, 0, 0, 2, 8, 4, 6, 0, 5]]
 
 
 def check_section(section, n):
@@ -111,6 +125,7 @@ def check_solution(grid, n_loc_rows, n_loc_cols, n_rows, n_cols):
 
     return True
 
+
 def bubble_sort(any_list):
     length = len(any_list)
     for i in range(0, length):
@@ -121,6 +136,7 @@ def bubble_sort(any_list):
                 any_list[j + 1] = buffer
 
     return any_list
+
 
 def find_empty(grid, n_loc_rows, n_loc_cols, n_rows, n_cols):
     zeros_outer = []
@@ -220,7 +236,7 @@ def recursive_solve(grid, n_loc_rows, n_loc_cols, n_rows, n_cols):
     
     """
     #finding the next empty space, and the possibilities that it can be
-    zeros = find_empty(grid, n_rows, n_cols, n_rows, n_cols)
+    zeros = find_empty(grid, n_loc_rows, n_loc_cols, n_rows, n_cols)
 
     #if the grid is full already:
     if not zeros:
@@ -272,6 +288,7 @@ def print_grid(grid) -> None:
     for row in grid:
         print(" ".join(str(cell) for cell in row))
 
+
 def write_grid_to_file(grid, file_name):
     """
     function for writing the solved (or partially solved) sudoku to the text file
@@ -281,38 +298,41 @@ def write_grid_to_file(grid, file_name):
             file.write(" ".join(str(cell) for cell in row) + "\n")
 
 
-print(recursive_solve(gridtest,3,3,9,9))
-if __name__ == "__main__":
-    """
-    main function 
-    """
-    
-    parser = argparse.ArgumentParser(description="Solve a Sudoku grid from a text file.")
-    parser.add_argument('--file', help="The input Sudoku grid file.",nargs=2,action='extend')
-    args = vars(parser.parse_args())
-    print(args.get('file'))
-    #try to open the file if the file argument is given:
-    try:
-        input_grid = read_grid_from_file(args.get('file')[0])
-        n_rows = len(input_grid)
-        n_cols = len(input_grid[0])
-        n_loc_rows = n_loc_cols = int(n_rows ** 0.5)
-        solution = recursive_solve(input_grid, n_loc_rows, n_loc_cols, n_rows, n_cols)
-        if solution:
-            #self explanatory, if the solve function returned the grid instead of None
-            print("Solved Sudoku grid:")
-            print_grid(solution)
-            # Save the solution to a text file
-            output_file_name: str = args.get('file')[1]
-            write_grid_to_file(solution, output_file_name)
-            print(f"Solution saved to file: {output_file_name}")
-        else:
-            print("The provided Sudoku grid has no solution.")
-    except:
-        #if there wasnt a file provided or the program could not find the file:
-        print('improper file name given!')
-    
-    
+# print(recursive_solve(gridtest,3,3,9,9))
+# if __name__ == "__main__":
+#     """
+#     main function
+#     """
+#
+#     parser = argparse.ArgumentParser(description="Solve a Sudoku grid from a text file.")
+#     parser.add_argument('--file', help="The input Sudoku grid file.",nargs=2,action='extend')
+#     args = vars(parser.parse_args())
+#     print(args.get('file'))
+#     #try to open the file if the file argument is given:
+#     try:
+#         input_grid = read_grid_from_file(args.get('file')[0])
+#         n_rows = len(input_grid)
+#         n_cols = len(input_grid[0])
+#         n_loc_rows = n_loc_cols = int(n_rows ** 0.5)
+#         solution = recursive_solve(input_grid, n_loc_rows, n_loc_cols, n_rows, n_cols)
+#         if solution:
+#             #self explanatory, if the solve function returned the grid instead of None
+#             print("Solved Sudoku grid:")
+#             print_grid(solution)
+#             # Save the solution to a text file
+#             output_file_name: str = args.get('file')[1]
+#             write_grid_to_file(solution, output_file_name)
+#             print(f"Solution saved to file: {output_file_name}")
+#         else:
+#             print("The provided Sudoku grid has no solution.")
+#     except:
+#         #if there wasnt a file provided or the program could not find the file:
+#         print('improper file name given!')
+
+start_time = time.time()
+print(recursive_solve(hard1, 3, 3, 9, 9))
+elapsed_time = time.time() - start_time
+print(elapsed_time)
     
 
 
