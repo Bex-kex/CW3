@@ -257,7 +257,7 @@ def recursive_solve(grid, n_loc_rows, n_loc_cols, n_rows, n_cols, explain=False,
         grid[row][col] = i
         
         if explain and steps is not None:
-            steps.append(f"Place value {i} in position ({row}, {col})")
+            steps.append(f"Place value {i} in position {row,col}")
 
         ans = recursive_solve(grid, n_loc_rows, n_loc_cols, n_rows, n_cols, explain, steps)
         #this if statement is only true once the bottom of the recursion depth has been reached AND 
@@ -270,7 +270,7 @@ def recursive_solve(grid, n_loc_rows, n_loc_cols, n_rows, n_cols, explain=False,
             steps.pop()
 
         grid[row][col] = 0
-    
+
     return None
 
 
@@ -293,22 +293,33 @@ def read_grid_from_file(file_name:str) -> list:
     return (grid,n_loc_rows,n_loc_cols,n_rows,n_cols)
 
 
-def print_grid(grid) -> None:
+def print_grid(grid,**kwargs) -> None:
     """
     Function to print the grid to the terminal in a readable format.
 
     """
     for row in grid:
         print(" ".join(str(cell) for cell in row))
+    if kwargs.get('explainstring'):
+        print('\nEXPLANATION:\n')
+        for i in kwargs.get('explainstring'):
+            print(i)
 
 
-def write_grid_to_file(grid, file_name):
+
+def write_grid_to_file(grid, file_name,**kwargs):
     """
     function for writing the solved (or partially solved) sudoku to the text file
     """
+    
     with open(file_name, 'w') as file:
         for row in grid:
             file.write(" ".join(str(cell) for cell in row) + "\n")
+        if kwargs.get('explainstring'):
+            file.write('\nEXPLANATION:\n')
+            for i in kwargs.get('explainstring'):
+                file.write(i+'\n')
+
 
 
 def generate_hints(unsolved: list,solved: list,hintnum: int) -> list:
@@ -333,41 +344,60 @@ def write_explanation(unsolved,solved):
     for ind_y, i in enumerate(solved):
         for ind_x, j in enumerate(i):
             if not unsolved[ind_y][ind_x] == j:
-                finalstr.append(f'put{j} in position{ind_x,ind_y}')
+                finalstr.append(f'Place value {j} in position{ind_y,ind_x}')
     return finalstr
-def main(args:dict):
 
+def main(args:dict):
+    steps=[]
     files:list = args.get('file_provided')
-    file_in = files[0]
-    file_out = files[1]
+    file_in ,file_out = files if files else None,None
     hint:int= int(args.get('doHint')[0])
     
     
     explain:bool = args.get('doExplain')
     profile:bool = args.get('doProfiling')
 
-    if files:
+    if file_in:
+        
         #if files have been provided, read it.
         grid: tuple = read_grid_from_file(file_in)
         unsolved = deepcopy(grid[0])
-        solution = recursive_solve(*grid)
-
+        solution = recursive_solve(*grid,explain=explain,steps=steps)
+        
     else:
-        unsolved = med2
-        solution = recursive_solve(med2,3,3,9,9)
+        unsolved = deepcopy(med2)
+        solution = recursive_solve(med2,3,3,9,9,explain=explain,steps=steps)
 
     if hint:
+        
         partially_solved_grid = generate_hints(unsolved,solution,hint)
         
         if explain:
+             #if hints on and explanation
              explanation = write_explanation(unsolved,partially_solved_grid)
-             return write_grid_to_file(partially_solved_grid,file_out,explainstring=explanation)
+             
+             if file_out:
+                return write_grid_to_file(partially_solved_grid,file_out,explainstring=explanation)
+             else:
+                return print_grid(partially_solved_grid,explainstring=explanation)
+            
         else:
-            return write_grid_to_file(partially_solved_grid,file_out)
+            #if hints only, no explanation
+            if file_out:
+                return write_grid_to_file(partially_solved_grid,file_out)
+            else:
+                return print_grid(partially_solved_grid)
+            
     else:
         if explain:
-            explanation = write_explanation(unsolved,solution)
-            return write_grid_to_file(solution,file_out,explainstring=explanation)
+            #explanation = write_explanation(unsolved,solution)
+            explanation = steps
+            if file_out:
+                #if grid from file, and explanation on, but no hints
+                return write_grid_to_file(solution,file_out,explainstring=explanation)
+            else:
+                #if explanation, no hints and no in/out file
+                return print_grid(solution,explanation=explanation)
         
     
     
@@ -396,26 +426,7 @@ if __name__ == "__main__":
     args:dict = vars(parser.parse_args())
     main(args)
 
-    #try to open the file if the file argument is given:
-#    try:
-#        input_grid = read_grid_from_file(args.get('file')[0])
-#        n_rows = len(input_grid)
-#        n_cols = len(input_grid[0])
-#        n_loc_rows = n_loc_cols = int(n_rows ** 0.5)
-#        solution = recursive_solve(input_grid, n_loc_rows, n_loc_cols, n_rows, n_cols)
-#        if solution:
-#            #self explanatory, if the solve function returned the grid instead of None
-#            print("Solved Sudoku grid:")
-#            print_grid(solution)
-#            # Save the solution to a text file
-#            output_file_name: str = args.get('file')[1]
-#            write_grid_to_file(solution, output_file_name)
-#            print(f"Solution saved to file: {output_file_name}")
-#        else:
-#            print("The provided Sudoku grid has no solution.")
-#    except:
-#        #if there wasnt a file provided or the program could not find the file:
-#        print('improper file name given!')
+    
 
 
         
