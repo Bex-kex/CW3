@@ -290,7 +290,11 @@ def read_grid_from_file(file_name:str) -> list:
         
     n_rows = len(grid)
     n_cols = len(grid[0])
-    n_loc_rows = n_loc_cols = int(n_rows ** 0.5)
+    if n_rows == 9:
+        n_loc_rows = n_loc_cols = int(n_rows ** 0.5)
+    else:
+        n_loc_rows = 2
+        n_loc_cols = 3
     
     return (grid,n_loc_rows,n_loc_cols,n_rows,n_cols)
 
@@ -376,8 +380,8 @@ def main(args:dict):
 
         #if no input file has been provided, just default to a built-in sudoku
         print(f'WARNING: invalid/none input file has been provided, defaulting to built in grid.')
-        unsolved = deepcopy(med2)
-        solution = recursive_solve(med2,3,3,9,9,explain=explain,steps=steps)
+        unsolved = deepcopy(easy3)
+        solution = recursive_solve(easy3,3,2,9,9,explain=explain,steps=steps)
 
     if hint:
         #If hints are toggled on
@@ -412,6 +416,11 @@ def main(args:dict):
             else:
                 #if explanation, no hints and no in/out file
                 return print_grid(solution,explanation=explanation)
+        else:
+            if file_out:
+                return write_grid_to_file(solution,file_out)
+            else:
+                return print_grid(solution)
         
     
     
