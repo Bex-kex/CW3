@@ -3,7 +3,14 @@ import matplotlib.pyplot as plt
 import main
 import os
 from pathlib import Path
+
+
 class Profiler():
+    """
+    class for handling the perfomance logging of the solver for many different grids, 
+    as well as multiple tries in the same grid. 
+
+    """
     def __init__(self,input_path) -> None:
         self.input_path:  str  =  input_path
         self.solve: function = main.main
@@ -17,35 +24,47 @@ class Profiler():
             
 
         self.output_path = str(self.output_path)
+    
+
+    def singlePass(self,list_of_paths):
+        ls = []
+        for i in list_of_paths:
+            start_time = time.time()
+            print(self.solve({'file_provided':i}))
+            time_taken = time.time()-start_time
+            ls.append([i[0],time_taken])
+        return ls
+
     def startProfiling(self) -> None:
         list_of_paths = []
-        timings = {}
+        
         
         start_time = time.time()
-        for i in os.listdir(self.input_path):
-                list_of_paths.append([self.input_path+'\\'+i,self.output_path + '\\' + i])
+        #disgustingly long listcomp ahead
+        list_of_paths = [
+            [self.input_path+'\\'+ i,self.output_path + '\\' + i] for 
+            i in [j for j in os.listdir(self.input_path) if j != 'output']
+                         ]
+        timings = {filename[0]:[]for filename in list_of_paths}
         
-        for i in list_of_paths:
-            args = {'file_provided':i}
-            start = time.time()
-            try:
-                print(self.solve(args))
-            except:
-                continue
-            stop = time.time()
-            print(f'time taken for grid "{i[0]}" : {round(stop-start,5)}s')
-
-            timings.update({i[0]:stop-start})
         print(timings)
+
+        annoyingly_huge_list = [self.singlePass(list_of_paths)for i in range(10)]
+        out1 = []
+        for i in annoyingly_huge_list:
+            for j in i:
+                timings[j[0]].append(j[1])
+        return timings
+        
+        
         
         
 
 def profilinghandler(*args):
     profiler = Profiler(*args)
-    profiler.startProfiling()
+    dict_of_results = profiler.startProfiling()
     return f'Profiling done! output saved to {profiler.output_path}'
 
 
 if __name__ == '__main__':
-    profiler = Profiler('grids')
-    profiler.startProfiling()
+    profilinghandler('grids')

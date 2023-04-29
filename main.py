@@ -318,10 +318,12 @@ def write_grid_to_file(grid, file_name,**kwargs) -> str:
     """
     function for writing the solved (or partially solved) sudoku to the text file
     """
-    
     with open(file_name, 'w') as file:
-        for row in grid:
-            file.write(" ".join(str(cell) for cell in row) + "\n")
+        try:
+            for row in grid:
+                file.write(" ".join(str(cell) for cell in row) + "\n")
+        except TypeError:
+            return f'failed to write, grid does not exist!!'
         if kwargs.get('explainstring'):
             file.write('\nEXPLANATION:\n')
             for i in kwargs.get('explainstring'):
@@ -368,7 +370,7 @@ def main(args:dict):
     #try: file_in, file_out = files 
     #except: file_in = file_out = None
     steps=[]
-    if profile_source: return Profiler.profilehandler(profile_source,profile_out)
+    if profile_source: return Profiler.profilehandler(profile_source)
     if file_in:
         #if files have been provided, read it.
         print(f'Reading grid from {file_in}...')
