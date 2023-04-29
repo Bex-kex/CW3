@@ -8,7 +8,14 @@ class Profiler():
         self.input_path:  str  =  input_path
         self.solve: function = main.main
         self.output_path = Path(self.input_path+'\\output')
-        self.output_path.mkdir()
+        if not self.output_path.is_dir():
+            self.output_path.mkdir()
+        else:
+            for child in self.output_path.iterdir():
+                child.unlink()
+            print([i for i in self.output_path.iterdir()])
+            
+
         self.output_path = str(self.output_path)
     def startProfiling(self) -> None:
         list_of_paths = []
@@ -19,13 +26,16 @@ class Profiler():
                 list_of_paths.append([self.input_path+'\\'+i,self.output_path + '\\' + i])
         
         for i in list_of_paths:
-             args = {'file_provided':i}
-             start = time.time()
-             print(self.solve(args))
-             stop = time.time()
-             print(f'time taken for grid{i[0]}: {stop-start}')
+            args = {'file_provided':i}
+            start = time.time()
+            try:
+                print(self.solve(args))
+            except:
+                continue
+            stop = time.time()
+            print(f'time taken for grid "{i[0]}" : {round(stop-start,5)}s')
 
-             timings.update({i[0]:stop-start})
+            timings.update({i[0]:stop-start})
         print(timings)
         
         
