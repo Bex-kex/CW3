@@ -1,8 +1,10 @@
+import os
 import time
+from pathlib import Path
 import matplotlib.pyplot as plt
 import main
-import os
-from pathlib import Path
+
+
 
 
 class Profiler():
@@ -13,70 +15,86 @@ class Profiler():
     """
     def __init__(self,input_path) -> None:
         """
-        sets up the profiler, by reading the input directory and making an output directory inside it, for storing the grids and the output graphs to.
+        sets up the profiler, by reading the input directory and making an output directory
+        inside it for storing the grids and the output graphs to.
         """
         self.input_path:  str  =  input_path
-        self.solve: function = main.main
+        self.solve = main.main
         self.output_path = Path(self.input_path+'\\output')
         if not self.output_path.is_dir():
             self.output_path.mkdir()
         else:
             for child in self.output_path.iterdir():
                 child.unlink()
-            
-            
+
 
         self.output_path = str(self.output_path)
-    
 
-    def singlePass(self,list_of_paths):
+
+    def single_pass(self,list_of_paths):
         """
         runs through the solving algorithm for each grid exactly once, and returns
         the time taken in the form of a nested list, with the filenames added to keep track
         of which timing is which.
         """
-        ls = []
+        timing_list = []
         for i in list_of_paths:
             #go through each filename and solve
             start_time = time.time()
             #the actual solving part \/\/
             print(self.solve({'file_provided':i}))
             time_taken = time.time()-start_time
-            ls.append([i[0],time_taken])
-        return ls
+            timing_list.append([i[0],time_taken])
+        return timing_list
 
-    def startProfiling(self) -> dict:
+    def start_profiling(self, number_of_passes:int) -> dict:
+        """
+        main profiling function. executes the solver for each grid in the folder x amount of times 
+        and returns the time taken in the form of a dict, with the keys being the paths to each grid
+        and the values being a list of the time taken for each "pass" of the grid.
+        """
         list_of_paths = []
-        
-        
-        start_time = time.time()
+
+
+
         #disgustingly long listcomp ahead
         list_of_paths = [
-            [self.input_path+'\\'+ i,self.output_path + '\\' + i] for 
+            [self.input_path+'\\'+ i,self.output_path + '\\' + i] for
             i in [j for j in os.listdir(self.input_path) if j != 'output']
                          ]
-        timings = {filename[0]:[]for filename in list_of_paths}
-        
-        print(timings)
 
-        annoyingly_huge_list = [self.singlePass(list_of_paths)for i in range(10)]
-        out1 = []
+        timings = {filename[0]:[]for filename in list_of_paths} #creating empty dict of the results
+        #dict will have filenams as keys, and temporarily an empty list as a placeholder value
+
+
+        #program will spend most of its execution time on this line.
+        #runs each solver x times according to value in range()
+        annoyingly_huge_list = [self.single_pass(list_of_paths)for i in range(number_of_passes)]
+
+
         for i in annoyingly_huge_list:
             for j in i:
                 timings[j[0]].append(j[1])
         return timings
-        
-        
-        
-        
+
+
+
+
 
 def profilinghandler(*args):
-    print(*args)
-    profiler = Profiler(*args)
+    """
+    main entry point for the profiler sub-program.
+    takes the command line arguments relevant to the profiler, parses them and does operations 
+    as required. probably better if included in the Profiler class instead of 
+    being a standalone function.
+    """
+    print(*args)#debug
+    profiler = Profiler(*args)#create profiler object
     print('STARTING PROFILING...')
-    time.sleep(0.5)
+    time.sleep(0.5) #delay, get ready for terminal spam!
     print('---------------------------------------')
-    dict_of_results:dict = profiler.startProfiling()
+    # integer arg is amount of times to run over the list of grids.
+    dict_of_results:dict = profiler.start_profiling(10)
     fig, ax = plt.subplots()
     ax.boxplot(dict_of_results.values(),labels=dict_of_results.keys())
     plt.show()
@@ -97,3 +115,4 @@ if __name__ == '__main__':
     
     
     """
+    
