@@ -66,11 +66,14 @@ class Profiler():
         timings = {filename[0]:[]for filename in list_of_paths} #creating empty dict of the results
         #dict will have filenams as keys, and temporarily an empty list as a placeholder value
 
-
-        #program will spend most of its execution time on this line.
+        annoyingly_huge_list = []
+        #program will spend most of its execution time on this loop.
         #runs each solver x times according to value in range()
-        annoyingly_huge_list = [self.single_pass(list_of_paths)for i in range(number_of_passes)]
-
+        for i in range(number_of_passes):
+            print('\n----------------------------------')
+            print(f'\tPASS {i+1}:')
+            print('----------------------------------\n')
+            annoyingly_huge_list.append(self.single_pass(list_of_paths))
 
         for i in annoyingly_huge_list:
             for j in i:
@@ -81,24 +84,29 @@ class Profiler():
 
 
 
-def profilinghandler(*args):
+def profilinghandler(args):
     """
     main entry point for the profiler sub-program.
     takes the command line arguments relevant to the profiler, parses them and does operations 
     as required. probably better if included in the Profiler class instead of 
     being a standalone function.
     """
-    print(*args)#debug
-    profiler = Profiler(*args)#create profiler object
+    #create profiler object
+    profiler = Profiler(args['sourceDirectory'].pop())
+    print('successfully made profiler object')
     print('STARTING PROFILING...')
-    time.sleep(0.5) #delay, get ready for terminal spam!
+    #delay, get ready for terminal spam!
+    time.sleep(0.5) 
     print('---------------------------------------')
     # integer arg is amount of times to run over the list of grids.
-    dict_of_results:dict = profiler.start_profiling(10)
+    dict_of_results:dict = profiler.start_profiling(args['sampleSize'].pop())
     fig, ax = plt.subplots()
     ax.boxplot(dict_of_results.values(),labels=dict_of_results.keys())
+    print(f'Profiling done! output saved to {profiler.output_path}')
+    time.sleep(0.5)
+    print('Showing graph...')
     plt.show()
-    return f'Profiling done! output saved to {profiler.output_path}'
+    return 'Finished execution! graphing and data export complete.'
 
 
 if __name__ == '__main__':
@@ -115,4 +123,3 @@ if __name__ == '__main__':
     
     
     """
-    

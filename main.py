@@ -299,6 +299,7 @@ def find_empty(grid: int, n_sub_rows: int, n_sub_cols: int) -> list:
     # after the third element of the sub-list.
     for a in range(len(zeros_outer)):
         i,j = zeros_outer[a]
+        
 
         only_suitable = get_possible(grid, n_sub_rows, n_sub_cols, i, j)
         zeros_outer[a].append(len(only_suitable))
@@ -353,7 +354,7 @@ def solve(grid:list, n_sub_rows: int, n_sub_cols: int,explain: bool=None,steps: 
     # out the zero.
     for i in possible_digits:
         grid[row][col] = i
-        grid[row][col] = 0
+        
         if explain and steps is not None:
             steps.append(f"Place value {i} in position {row,col}")
         ans = solve(grid, n_sub_rows, n_sub_cols)
@@ -408,6 +409,7 @@ def print_grid(grid: list,**kwargs) -> str:
     :return: a string which confirms execution of the printing process has finished.
 
     """
+    print('SOLUTION:\n')
     for row in grid:
         print(" ".join(str(cell) for cell in row))
 
@@ -509,12 +511,15 @@ def main(args: dict):
     file_in,file_out = args.get('file_provided') if args.get('file_provided') else [None,None]
     hint: int = int(args.get('doHint')[0]) if args.get('doHint') else None
     explain: bool = args.get('doExplain') if args.get('doExplain') else False
-    profile_source = args.get('doProfiling') if args.get('doProfiling') else None
+    profile_mode = args.get('doProfiling') if args.get('doProfiling') else None
 
 
     steps=[]
-    if profile_source:
-        return Profiler.profilinghandler(profile_source)
+    if profile_mode:
+        print('Profile mode selected!')
+        profiling_relevant_arguments = ['csvPath','displayMode','sourceDirectory','graphPath','sampleSize']
+        profiling_relevant_arguments = {k:args[k] for k in args.keys() if k in profiling_relevant_arguments}
+        return Profiler.profilinghandler(profiling_relevant_arguments)
 
     if file_in:
         #if files have been provided, read it.
@@ -577,7 +582,13 @@ def main(args: dict):
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="Solve a Sudoku grid from a text file, \
-                                     with additional options such as profiling and explaining the solution")
+            with additional options such as profiling and explaining the solution")
+    
+    profiling_subparser = parser.add_subparsers(description=
+            'Assess the performance of the solving algorithm across many grids and many attempts. \
+            use "main.py profiling -h/--help" for help on profiling-specific arguments',dest='doProfiling',title='Profiling')
+    profiling = profiling_subparser.add_parser('profiling',
+            description='Arguments for the profiling mode. all other arguments will not work from now on!')
 
     parser.add_argument('-f','--file',dest='file_provided',
             help= "The input Sudoku grid file.", nargs=2,action='extend')
@@ -585,19 +596,28 @@ if __name__ == "__main__":
             help= "Toggles whether an explanation is added",action='store_true')
     parser.add_argument('-ht','--hint'   ,dest='doHint',
             help= 'only fill in the grid with x amount of correct values',action='store',nargs=1)
+    
+    profiling.add_argument("-g","--graph",dest='graphPath',  
+            help= 'the output path of the graph image if you would like to save it.',
+            action='extend',nargs=1,type=str)
+    profiling.add_argument("-dir","--directory",dest='sourceDirectory',
+            help='the source of the directory of the test grids.', 
+            action='extend',required=True,nargs=1,type=str)
+    profiling.add_argument("--display",dest='displayMode',  
+            help='which graph preset mode you want the program to display. there are 5 different display modes',
+            action ='extend',choices = [i for i in range(1,6)],nargs= 1,type=int)
+    profiling.add_argument("--samplesize",dest='sampleSize',
+            help='how many times to loop through the directory containing the grids. \
+            Higher value means profiling takes longer, but will more precise timing info. Default value:10',action='store',nargs=1,
+            type=int,default=10)
+    profiling.add_argument("--csv",dest='csvPath',
+            help='the output path of the csv file containing timings if you would like to save it.',
+            action='extend',nargs=1,type=str)
+    
 
-    """
-    profiling_subparser = parser.add_subparsers(help='subparser for the profiling mode.')
-    profiling_subparser.add_parser('profiling',help='arguments for the profiling mode. all other arguments will not work from now on!')
-    profiling_subparser.add_argument("--graph",dest='doProfiling',  
-                        help= 'the output file of the graph image if you would like to save it.',
-                            action='extend',nargs=1)
-    profiling_subparser.add_argument("--display",dest='doProfiling',  
-                        help='which graph preset mode you want the program to display. there are 5 different display modes',
-                        action ='extend',choices = [i for i in range(5)],nargs= 1,type=int)
-    #parser.add_argument("--csv"),dest='doProfiling'
-    """
-
-
+    
+    
     args: dict = vars(parser.parse_args())
+   
     print(main(args))
+    
