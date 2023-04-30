@@ -351,7 +351,7 @@ def solve(grid, n_sub_rows, n_sub_cols):
         grid[row][col] = i
         grid[row][col] = 0
         if explain and steps is not None:
-            steps.append(f"Place value {i} in position {row, col}")
+            steps.append(f"Place value {i} in position {row,col}")
         ans = solve(grid, n_sub_rows, n_sub_cols)
         # This if statement is only true once the bottom of the recursion depth has been reached AND
         # the grid is solved. basically just passes the grid back up the stack.
@@ -453,12 +453,12 @@ def main(args:dict):
     file_in,file_out = args.get('file_provided') if args.get('file_provided') else [None,None]
     hint: int = int(args.get('doHint')[0]) if args.get('doHint') else None
     explain: bool = args.get('doExplain') if args.get('doExplain') else False
-    profile_source,profile_out = args.get('doProfiling') if args.get('doProfiling') else [None,None]
+    profile_source = args.get('doProfiling') if args.get('doProfiling') else None
 
     #try: file_in, file_out = files 
     #except: file_in = file_out = None
     steps=[]
-    if profile_source: return Profiler.profilehandler(profile_source)
+    if profile_source: return Profiler.profilinghandler(profile_source)
     if file_in:
         #if files have been provided, read it.
         print(f'Reading grid from {file_in}...')
@@ -471,7 +471,7 @@ def main(args:dict):
         #if no input file has been provided, just default to a built-in sudoku
         print(f'WARNING: invalid/none input file has been provided, defaulting to built in grid.')
         unsolved = deepcopy(easy3)
-        solution = recursive_solve(easy3,3,2,9,9,explain=explain,steps=steps)
+        solution = recursive_solve(easy3,3,2,6,6,explain=explain,steps=steps)
 
     if hint:
         #If hints are toggled on
@@ -527,14 +527,25 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Solve a Sudoku grid from a text file, \
                                      with additional options such as profiling and explaining the solution")
     
-    parser.add_argument('-f','--file',dest='file_provided', \
+    parser.add_argument('-f','--file',dest='file_provided', 
                         help= "The input Sudoku grid file.", nargs=2,action='extend')
-    parser.add_argument('-e','--explain',dest='doExplain',     \
+    parser.add_argument('-e','--explain',dest='doExplain',     
                         help= "Toggles whether an explanation is added",action='store_true')
-    parser.add_argument('-ht','--hint'   ,dest='doHint',        \
+    parser.add_argument('-ht','--hint'   ,dest='doHint',        
                         help= 'only fill in the grid with x amount of correct values',action='store',nargs=1)
-    parser.add_argument('-p','--profile',dest='doProfiling',   \
-                        help= 'toggle profiling of the recursive solve algorithm',action='store_true')
+    
+    """
+    profiling_subparser = parser.add_subparsers(help='subparser for the profiling mode.')
+    profiling_subparser.add_parser('profiling',help='arguments for the profiling mode. all other arguments will not work from now on!')
+    profiling_subparser.add_argument("--graph",dest='doProfiling',  
+                        help= 'the output file of the graph image if you would like to save it.',
+                            action='extend',nargs=1)
+    profiling_subparser.add_argument("--display",dest='doProfiling',  
+                        help='which graph preset mode you want the program to display. there are 5 different display modes',
+                        action ='extend',choices = [i for i in range(5)],nargs= 1,type=int)
+    #parser.add_argument("--csv"),dest='doProfiling'
+    """
+
                     
     args: dict = vars(parser.parse_args())
     print(main(args))
