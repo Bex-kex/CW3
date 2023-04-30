@@ -286,8 +286,8 @@ def read_grid_from_file(file_name:str) -> list:
     if n_rows == 9:
         n_loc_rows = n_loc_cols = int(n_rows ** 0.5)
     else:
-        n_loc_rows = 2
-        n_loc_cols = 3
+        n_loc_rows = 3
+        n_loc_cols = 2
     
     return (grid,n_loc_rows,n_loc_cols,n_rows,n_cols)
 
