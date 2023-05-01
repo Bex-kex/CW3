@@ -1,5 +1,6 @@
 import os
 import time
+import csv
 from pathlib import Path
 import matplotlib.pyplot as plt
 import main
@@ -13,20 +14,27 @@ class Profiler():
     as well as multiple tries in the same grid. 
 
     """
-    def __init__(self,input_path) -> None:
+    def __init__(self,args: dict) -> None:
         """
         sets up the profiler, by reading the input directory and making an output directory
         inside it for storing the grids and the output graphs to.
         """
-        self.input_path:  str  =  input_path
+        print(args)
+        self.source_dir: str   = args['sourceDirectory'].pop() if args['sourceDirectory'] else None
+        self.sample_size: int = args['sampleSize'] if args['sampleSize'] else None
+        self.display_mode: int = args['displayMode'] if args['displayMode'] else None
+        self.csv_path: str     = args['csvPath'].pop() if args['csvPath'] else None
+        self.graph_path: str   = args['graphPath'].pop() if args['graphPath'] else None
+
+        self.timings: dict = {}
         self.solve = main.main
-        self.output_path = Path(self.input_path+'\\output')
+        self.output_path = Path(self.source_dir+'\\output')
+
         if not self.output_path.is_dir():
             self.output_path.mkdir()
         else:
             for child in self.output_path.iterdir():
                 child.unlink()
-
 
         self.output_path = str(self.output_path)
 
@@ -47,7 +55,7 @@ class Profiler():
             timing_list.append([i[0],time_taken])
         return timing_list
 
-    def start_profiling(self, number_of_passes:int) -> dict:
+    def start_profiling(self) -> dict:
         """
         main profiling function. executes the solver for each grid in the folder x amount of times 
         and returns the time taken in the form of a dict, with the keys being the paths to each grid
@@ -59,8 +67,8 @@ class Profiler():
 
         #disgustingly long listcomp ahead
         list_of_paths = [
-            [self.input_path+'\\'+ i,self.output_path + '\\' + i] for
-            i in [j for j in os.listdir(self.input_path) if j != 'output']
+            [self.source_dir+'\\'+ i,self.output_path + '\\' + i] for
+            i in [j for j in os.listdir(self.source_dir) if j != 'output']
                          ]
 
         timings = {filename[0]:[]for filename in list_of_paths} #creating empty dict of the results
@@ -69,7 +77,7 @@ class Profiler():
         annoyingly_huge_list = []
         #program will spend most of its execution time on this loop.
         #runs each solver x times according to value in range()
-        for i in range(number_of_passes):
+        for i in range(self.sample_size):
             print('\n----------------------------------')
             print(f'\tPASS {i+1}:')
             print('----------------------------------\n')
@@ -78,13 +86,17 @@ class Profiler():
         for i in annoyingly_huge_list:
             for j in i:
                 timings[j[0]].append(j[1])
+        self.timings = timings
         return timings
 
+    def write_to_csv(self) -> str:
+        temp_list = [i.insert(0,list(self.timings.keys())[ind]) for ind,i in enumerate(self.timings.values())]
+        print(temp_list)
+        return f'Write completed succesfully! csv is located in {self.csv_path}'
 
 
 
-
-def profilinghandler(args):
+def profilinghandler(args: dict):
     """
     main entry point for the profiler sub-program.
     takes the command line arguments relevant to the profiler, parses them and does operations 
@@ -92,14 +104,21 @@ def profilinghandler(args):
     being a standalone function.
     """
     #create profiler object
-    profiler = Profiler(args['sourceDirectory'].pop())
-    print('successfully made profiler object')
+    
+    profiler = Profiler(args)
+
+    
     print('STARTING PROFILING...')
     #delay, get ready for terminal spam!
-    time.sleep(0.5) 
     print('---------------------------------------')
+    time.sleep(0.5) 
     # integer arg is amount of times to run over the list of grids.
-    dict_of_results:dict = profiler.start_profiling(args['sampleSize'].pop())
+    dict_of_results:dict = profiler.start_profiling()
+    if profiler.csv_path:
+        profiler.write_to_csv()
+
+    #profiler.display_graph()
+    
     fig, ax = plt.subplots()
     ax.boxplot(dict_of_results.values(),labels=dict_of_results.keys())
     print(f'Profiling done! output saved to {profiler.output_path}')
