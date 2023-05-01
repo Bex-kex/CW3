@@ -1,8 +1,8 @@
-
 import argparse
 from copy import deepcopy
 import Profiler
 import time
+import matplotlib.pyplot as plt
 
 easy1 = [
     [9, 0, 6, 0, 0, 1, 0, 4, 0],
@@ -70,7 +70,7 @@ med2 = [
 
 def check_section(section, n):
     """
-    The "check_section" function is responsible for checking if a section of the grid is filled according to 
+    The "check_section" function is responsible for checking if a section of the grid is filled according to
     the rules of Sudoku.
     :param section: row or column
     :param n: product of the numbers of sub-columns and sub-rows
@@ -231,7 +231,7 @@ def get_all(grid, n_sub_rows, n_sub_cols, i, j):
 
 def get_possible(grid, n_sub_rows, n_sub_cols, i, j):
     """
-    The "get_possible function" returns only the values that could be placed instead of the zero for a 
+    The "get_possible function" returns only the values that could be placed instead of the zero for a
     Sudoku grid to be solved.
 
     :param grid: given grid
@@ -254,7 +254,7 @@ def get_possible(grid, n_sub_rows, n_sub_cols, i, j):
     return only_suitable
 
 
-def bubble_sort(any_list:list) -> list:
+def bubble_sort(any_list: list) -> list:
     """
     Ordinary bubble sort function that is used to sort zeros starting from the one with the least possible values to
     the one with the most
@@ -290,7 +290,7 @@ def find_empty(grid: int, n_sub_rows: int, n_sub_cols: int) -> list:
     # The nested loop below adds i and j-positions to the sublist of the zero.
     for i in range(n_rows):
         for j in range(n_cols):
-            if grid[i][j] == 0:
+            if j == 0:
                 zeros_inner.append(i)
                 zeros_inner.append(j)
                 zeros_outer.append(zeros_inner)
@@ -299,8 +299,7 @@ def find_empty(grid: int, n_sub_rows: int, n_sub_cols: int) -> list:
     # The given nested loop adds the number of possible values in addition to i and j-positions and lists all of them
     # after the third element of the sub-list.
     for a in range(len(zeros_outer)):
-        i,j = zeros_outer[a]
-        
+        i, j = zeros_outer[a]
 
         only_suitable = get_possible(grid, n_sub_rows, n_sub_cols, i, j)
         zeros_outer[a].append(len(only_suitable))
@@ -314,7 +313,7 @@ def find_empty(grid: int, n_sub_rows: int, n_sub_cols: int) -> list:
     return zeros_sorted
 
 
-def solve(grid:list, n_sub_rows: int, n_sub_cols: int,explain: bool=None,steps: list=None) ->list[list[int]]:
+def solve(grid: list, n_sub_rows: int, n_sub_cols: int, explain: bool = None, steps: list = None) -> list[list[int]]:
     """
     The "solve" function is called recursively to find the solution for the grid.
 
@@ -355,9 +354,9 @@ def solve(grid:list, n_sub_rows: int, n_sub_cols: int,explain: bool=None,steps: 
     # out the zero.
     for i in possible_digits:
         grid[row][col] = i
-        
+
         if explain and steps is not None:
-            steps.append(f"Place value {i} in position {row,col}")
+            steps.append(f"Place value {i} in position {row, col}")
         ans = solve(grid, n_sub_rows, n_sub_cols)
         # This if statement is only true once the bottom of the recursion depth has been reached AND
         # the grid is solved. basically just passes the grid back up the stack.
@@ -373,9 +372,30 @@ def solve(grid:list, n_sub_rows: int, n_sub_cols: int,explain: bool=None,steps: 
     return None
 
 
+def measure_performance(grid_solver, grids):
+    execution_times = []
+    for grid in grids:
+        start_time = time.time()
+        grid_solver(grid)
+        end_time = time.time()
+        execution_times.append(end_time - start_time)
+    return execution_times
+
+
+performance_grids = [easy1, easy2, easy3, hard1, med1, med2]
+execution_times = measure_performance(solve(performance_grids, None, None), performance_grids)
+
+plt.plot(range(len(performance_grids)), execution_times)
+plt.title('Sudoku Solver Performance')
+plt.xlabel('Grid Index')
+plt.ylabel('Execution Time (s)')
+plt.show()
+
+
+
 def read_grid_from_file(file_name: str) -> list:
     """
-    Function to read the grid from a text file. and to return the grid in a format that is understandable by the 
+    Function to read the grid from a text file. and to return the grid in a format that is understandable by the
     solve() function.
 
     :param file_name: the given file name.
@@ -383,26 +403,26 @@ def read_grid_from_file(file_name: str) -> list:
 
     """
     with open(file_name, 'r') as file:
-        #formatting the raw text in order to extract just the numbers.
+        # formatting the raw text in order to extract just the numbers.
         grid = [[int(num) for num in line.strip().split(',')] for line in file]
 
-    #determining the grid dimensions.
+    # determining the grid dimensions.
     grid_dims_y = len(grid)
     grid_dims_x = len(grid[0])
 
-    #if the grid is a 9x9 or a 4x4 grid, subgrid dimensions are simply squares with length 3 or 2 respectively.
-    if grid_dims_y in [9,4]:
+    # if the grid is a 9x9 or a 4x4 grid, subgrid dimensions are simply squares with length 3 or 2 respectively.
+    if grid_dims_y in [9, 4]:
         subgrid_dims_x = subgrid_dims_y = int(grid_dims_y ** 0.5)
 
-    #if the grid is a 6x6, slightly different procedure. subgrids are now 3x2 rectangles instead of squares.
+    # if the grid is a 6x6, slightly different procedure. subgrids are now 3x2 rectangles instead of squares.
     elif grid_dims_y == 6:
         subgrid_dims_x = 2
         subgrid_dims_y = 3
 
-    return (grid,subgrid_dims_y,subgrid_dims_x)
+    return (grid, subgrid_dims_y, subgrid_dims_x)
 
 
-def print_grid(grid: list,**kwargs) -> str:
+def print_grid(grid: list, **kwargs) -> str:
     """
     Function to print the grid to the terminal in a readable format.
 
@@ -422,8 +442,7 @@ def print_grid(grid: list,**kwargs) -> str:
     return 'Finished execution! output printed to terminal.'
 
 
-
-def write_grid_to_file(grid, file_name,**kwargs) -> str:
+def write_grid_to_file(grid, file_name, **kwargs) -> str:
     """
     function for writing the solved (or partially solved) sudoku to the text file.
 
@@ -436,70 +455,70 @@ def write_grid_to_file(grid, file_name,**kwargs) -> str:
             for row in grid:
                 file.write(" ".join(str(cell) for cell in row) + "\n")
 
-        #if it cant iterate over the grid as its a NoneType, it means the solver failed to solve the grid.
+        # if it cant iterate over the grid as its a NoneType, it means the solver failed to solve the grid.
         except TypeError:
             return 'failed to write, grid does not exist!!'
 
-        #if an explain string is given, write it to the file, after the solved grid.
+        # if an explain string is given, write it to the file, after the solved grid.
         if kwargs.get('explainstring'):
             file.write('\nEXPLANATION:\n')
             for i in kwargs.get('explainstring'):
-                file.write(i+'\n')
+                file.write(i + '\n')
 
     return f'Finished execution! output saved to {file_name}'
 
 
-
-def generate_hints(unsolved: list,solved: list,hintnum: int) -> list:
+def generate_hints(unsolved: list, solved: list, hintnum: int) -> list:
     """
-    this function will take the completely solved grid, and remove some of the elements of the 
-    solved grid, until it is left with a partially solved grid, with the amount of solved cells 
+    this function will take the completely solved grid, and remove some of the elements of the
+    solved grid, until it is left with a partially solved grid, with the amount of solved cells
     equal to the {solved} argument.
 
     :param unsolved: a copy of the unsolved grid used as reference.
     :param solved: the solved list to be subtracting from
     :return: a partially solved grid with {hintnum} amount of empty cells filled in.
     """
-    #make a deep copy of the unsolved grid.
-    #needed as a simple copy with nested lists will make a copy but the lists inside will still
-    #point to the same list in memory, so a deepcopy is needed to make a completely unlinked list.
+    # make a deep copy of the unsolved grid.
+    # needed as a simple copy with nested lists will make a copy but the lists inside will still
+    # point to the same list in memory, so a deepcopy is needed to make a completely unlinked list.
     partially_solved: list[list[int]] = deepcopy(unsolved)
     counter: int = 0
 
-    #loop through y dimensions of grid.
-    for ind,i in enumerate(solved):
-        #loop through x dimensions of grid.
-        for ind2,j in enumerate(i):
-            #if the unsolved grid is different from the solved grid (i.e. a cell filled by the solver)
-            #and the number of hints required has not been reached, add it to the partially solved grid.
-            if not(j == unsolved[ind][ind2]) and counter <= hintnum:
+    # loop through y dimensions of grid.
+    for ind, i in enumerate(solved):
+        # loop through x dimensions of grid.
+        for ind2, j in enumerate(i):
+            # if the unsolved grid is different from the solved grid (i.e. a cell filled by the solver)
+            # and the number of hints required has not been reached, add it to the partially solved grid.
+            if not (j == unsolved[ind][ind2]) and counter <= hintnum:
                 partially_solved[ind][ind2] = solved[ind][ind2]
                 counter += 1
 
-            #otherwise, keep it unsolved.
+            # otherwise, keep it unsolved.
             else:
                 partially_solved[ind][ind2] = unsolved[ind][ind2]
 
     return partially_solved
 
 
-def write_explanation(unsolved: list,solved: list) -> list[str]:
+def write_explanation(unsolved: list, solved: list) -> list[str]:
     """
     this function will write the explanation of what numbers have been filled in and where,
-    in order to get to the solved grid. This function is only used when hints is enabled, as the 
+    in order to get to the solved grid. This function is only used when hints is enabled, as the
     other implementation of the explain procedure would not match with the partially solved grid.
-    
+
     :param unsolved: the unsolved grid used to compare what has changed.
     :param solved: the solved, or partially solved grid used as the reference.
     :return: a list of strings, the strings containing the co ordinate of the empty cell and the value to put in it.
 
     """
-    finalstr:list[str] = []
+    finalstr: list[str] = []
     for ind_y, i in enumerate(solved):
         for ind_x, j in enumerate(i):
             if not unsolved[ind_y][ind_x] == j:
-                finalstr.append(f'Place value {j} in position{ind_y,ind_x}')
+                finalstr.append(f'Place value {j} in position{ind_y, ind_x}')
     return finalstr
+
 
 def main(args: dict):
     """
@@ -509,114 +528,109 @@ def main(args: dict):
     :param args: the parsed arguments, in the form of a dictionary.
     :return: whatever the return string of the write_grid_to_file() function or the print_grid() function.
     """
-    file_in,file_out = args.get('file_provided') if args.get('file_provided') else [None,None]
+    file_in, file_out = args.get('file_provided') if args.get('file_provided') else [None, None]
     hint: int = int(args.get('doHint')[0]) if args.get('doHint') else None
     explain: bool = args.get('doExplain') if args.get('doExplain') else False
     profile_mode = args.get('doProfiling') if args.get('doProfiling') else None
 
-
-    steps=[]
+    steps = []
     if profile_mode:
         print('Profile mode selected!')
-        profiling_relevant_arguments = ['csvPath','displayMode','sourceDirectory','graphPath','sampleSize']
-        profiling_relevant_arguments = {k:args[k] for k in args.keys() if k in profiling_relevant_arguments}
+        profiling_relevant_arguments = ['csvPath', 'displayMode', 'sourceDirectory', 'graphPath', 'sampleSize']
+        profiling_relevant_arguments = {k: args[k] for k in args.keys() if k in profiling_relevant_arguments}
         return Profiler.profilinghandler(profiling_relevant_arguments)
 
     if file_in:
-        #if files have been provided, read it.
+        # if files have been provided, read it.
         print(f'Reading grid from {file_in}...')
         grid: tuple = read_grid_from_file(file_in)
         unsolved = deepcopy(grid[0])
-        solution = solve(*grid,explain=explain,steps=steps)
+        solution = solve(*grid, explain=explain, steps=steps)
 
     else:
 
-        #if no input file has been provided, just default to a built-in sudoku
+        # if no input file has been provided, just default to a built-in sudoku
         print('WARNING: invalid/none input file has been provided, defaulting to built in grid.')
         unsolved = deepcopy(easy3)
-        solution = solve(easy3,3,2,explain,steps)
+        solution = solve(easy3, 3, 2, explain, steps)
 
     if hint:
-        #If hints are toggled on
+        # If hints are toggled on
 
-        #generate the partially solved grid according to how many need to be filled in.
-        partially_solved_grid = generate_hints(unsolved,solution,hint)
+        # generate the partially solved grid according to how many need to be filled in.
+        partially_solved_grid = generate_hints(unsolved, solution, hint)
 
         if explain:
-            #if hints on and explanation
-            #requires a different explanation function to work properly \(0_0)/
-            explanation = write_explanation(unsolved,partially_solved_grid)
+            # if hints on and explanation
+            # requires a different explanation function to work properly \(0_0)/
+            explanation = write_explanation(unsolved, partially_solved_grid)
 
             if file_out:
-                return write_grid_to_file(partially_solved_grid,file_out,explainstring=explanation)
+                return write_grid_to_file(partially_solved_grid, file_out, explainstring=explanation)
             else:
-                return print_grid(partially_solved_grid,explainstring=explanation)
+                return print_grid(partially_solved_grid, explainstring=explanation)
 
         else:
-            #if hints only, no explanation
+            # if hints only, no explanation
             if file_out:
-                return write_grid_to_file(partially_solved_grid,file_out)
+                return write_grid_to_file(partially_solved_grid, file_out)
             else:
                 return print_grid(partially_solved_grid)
 
     else:
         if explain:
-            #explanation = write_explanation(unsolved,solution)
+            # explanation = write_explanation(unsolved,solution)
             explanation = steps
             if file_out:
-                #if grid from file, and explanation on, but no hints
-                return write_grid_to_file(solution,file_out,explainstring=explanation)
+                # if grid from file, and explanation on, but no hints
+                return write_grid_to_file(solution, file_out, explainstring=explanation)
             else:
-                #if explanation, no hints and no in/out file
-                return print_grid(solution,explanation=explanation)
+                # if explanation, no hints and no in/out file
+                return print_grid(solution, explanation=explanation)
         else:
             if file_out:
-                return write_grid_to_file(solution,file_out)
+                return write_grid_to_file(solution, file_out)
             else:
                 return print_grid(solution)
 
 
-
-
 if __name__ == "__main__":
-
     parser = argparse.ArgumentParser(description="Solve a Sudoku grid from a text file, \
             with additional options such as profiling and explaining the solution")
-    
+
     profiling_subparser = parser.add_subparsers(description=
-            'Assess the performance of the solving algorithm across many grids and many attempts. \
-            use "main.py profiling -h/--help" for help on profiling-specific arguments',dest='doProfiling',title='Profiling')
+                                                'Assess the performance of the solving algorithm across many grids and many attempts. \
+                                                use "main.py profiling -h/--help" for help on profiling-specific arguments',
+                                                dest='doProfiling', title='Profiling')
     profiling = profiling_subparser.add_parser('profiling',
-            description='Arguments for the profiling mode. all other arguments will not work from now on!')
+                                               description='Arguments for the profiling mode. all other arguments will not work from now on!')
 
-    parser.add_argument('-f','--file',dest='file_provided',
-            help= "The input Sudoku grid file.", nargs=2,action='extend')
-    parser.add_argument('-e','--explain',dest='doExplain',
-            help= "Toggles whether an explanation is added",action='store_true')
-    parser.add_argument('-ht','--hint'   ,dest='doHint',
-            help= 'only fill in the grid with x amount of correct values',action='store',nargs=1)
-    
-    profiling.add_argument("-g","--graph",dest='graphPath',  
-            help= 'the output path of the graph image if you would like to save it.',
-            action='extend',nargs=1,type=str)
-    profiling.add_argument("-dir","--directory",dest='sourceDirectory',
-            help='the source of the directory of the test grids.', 
-            action='extend',required=True,nargs=1,type=str)
-    profiling.add_argument("--display",dest='displayMode',  
-            help='which graph preset mode you want the program to display. there are 5 different display modes',
-            action ='extend',choices = [i for i in range(1,6)],nargs= 1,type=int)
-    profiling.add_argument("--samplesize",dest='sampleSize',
-            help='how many times to loop through the directory containing the grids. \
-            Higher value means profiling takes longer, but will more precise timing info. Default value:10',action='store',nargs=1,
-            type=int,default=10)
-    profiling.add_argument("--csv",dest='csvPath',
-            help='the output path of the csv file containing timings if you would like to save it.',
-            action='extend',nargs=1,type=str)
-    
+    parser.add_argument('-f', '--file', dest='file_provided',
+                        help="The input Sudoku grid file.", nargs=2, action='extend')
+    parser.add_argument('-e', '--explain', dest='doExplain',
+                        help="Toggles whether an explanation is added", action='store_true')
+    parser.add_argument('-ht', '--hint', dest='doHint',
+                        help='only fill in the grid with x amount of correct values', action='store', nargs=1)
 
-    
-    
+    profiling.add_argument("-g", "--graph", dest='graphPath',
+                           help='the output path of the graph image if you would like to save it.',
+                           action='extend', nargs=1, type=str)
+    profiling.add_argument("-dir", "--directory", dest='sourceDirectory',
+                           help='the source of the directory of the test grids.',
+                           action='extend', required=True, nargs=1, type=str)
+    profiling.add_argument("--display", dest='displayMode',
+                           help='which graph preset mode you want the program to display. there are 5 different display modes',
+                           action='extend', choices=[i for i in range(1, 6)], nargs=1, type=int)
+    profiling.add_argument("--samplesize", dest='sampleSize',
+                           help='how many times to loop through the directory containing the grids. \
+            Higher value means profiling takes longer, but will more precise timing info. Default value:10',
+                           action='store', nargs=1,
+                           type=int, default=10)
+    profiling.add_argument("--csv", dest='csvPath',
+                           help='the output path of the csv file containing timings if you would like to save it.',
+                           action='extend', nargs=1, type=str)
+
     args: dict = vars(parser.parse_args())
-   
+
     print(main(args))
-    
+
