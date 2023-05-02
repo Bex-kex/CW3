@@ -1,7 +1,7 @@
 import argparse
 from copy import deepcopy
 import Profiler
-from functions.write_explanation_func import write_explanation
+from write_explanation_func import write_explanation
 from wavefront_funcs import *
 from file_handler import *
 
@@ -100,7 +100,6 @@ def generate_hints(unsolved: list, solved: list, hintnum: int) -> list:
                 partially_solved[ind][ind2] = unsolved[ind][ind2]
 
     return partially_solved
-
 
 
 def main(args: dict):
