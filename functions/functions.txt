@@ -1,0 +1,1 @@
+This folder contains some of the major functions used in main.py. These are imported into the primary program.
