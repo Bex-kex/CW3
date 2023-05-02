@@ -1,12 +1,11 @@
 import argparse
 from copy import deepcopy
 import Profiler
-import time
-from write_explanation_func import write_explanation
-from check_section_func import check_section
-from split_into_squares_func import split_into_squares
-from find_n_rows_cols_func import find_n_rows_cols
-from get_squares_func import get_squares
+from functions.write_explanation_func import write_explanation
+from functions.check_section_func import check_section
+from functions.split_into_squares_func import split_into_squares
+from functions.find_n_rows_cols_func import find_n_rows_cols
+from functions.get_squares_func import get_squares
 
 easy1 = [
     [9, 0, 6, 0, 0, 1, 0, 4, 0],

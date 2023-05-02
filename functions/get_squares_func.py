@@ -1,5 +1,5 @@
-from find_n_rows_cols_func import find_n_rows_cols
-from split_into_squares_func import split_into_squares
+from functions.find_n_rows_cols_func import find_n_rows_cols
+from functions.split_into_squares_func import split_into_squares
 
 def get_squares(grid, n_sub_rows, n_sub_cols):
     """
