@@ -3,6 +3,10 @@ from copy import deepcopy
 import Profiler
 import time
 from write_explanation_func import write_explanation
+from check_section_func import check_section
+from split_into_squares_func import split_into_squares
+from find_n_rows_cols_func import find_n_rows_cols
+from get_squares_func import get_squares
 
 easy1 = [
     [9, 0, 6, 0, 0, 1, 0, 4, 0],
@@ -68,82 +72,10 @@ med2 = [
     [0, 0, 0, 2, 8, 4, 6, 0, 5]]
 
 
-def check_section(section, n):
-    """
-    The "check_section" function is responsible for checking if a section of the grid is filled according to
-    the rules of Sudoku.
-    :param section: row or column
-    :param n: product of the numbers of sub-columns and sub-rows
-    :return: True if a row or a column meets the requirements of the game, otherwise False
-    """
-    # The following if statement is used to check whether a section contains any repetitive values and whether the
-    # sum of values in the section is equal to the sum of the numbers from 1 to n (the maximum allowed value).
-    if len(set(section)) == len(section) and sum(section) == sum([i for i in range(n + 1)]):
-        return True
-
-    return False
 
 
-def split_into_squares(sub_grid, n):
-    """
-    The "split_into_squares" function defines the anchor points in the grid, which will be used to split the grid
-    into equally-sized squares. For instance, in a 9x9 grid with 9 rows and 9 columns, the anchor points will be 0,
-    3, and 6. These anchor points determine where the grid should be split to form 3x3 squares
-    :param sub_grid: row or column dimension of the grid
-    :param n: number of rows or columns
-    :return: list of anchor points
-    """
-    split = []
-    # The variable boundary is set to 0 and acts as a starting point
-    boundary = 0
-    # The loop below defines the number of anchor points depending on the dimensions of the grid.
-    for i in range(sub_grid):
-        split.append(boundary)
-        # This line increments the "boundary" variable by the width of the grid.
-        boundary += n // sub_grid
-
-    return split
 
 
-def find_n_rows_cols(grid):
-    """
-    The "find_n_rows_cols" function returns the number of rows and columns in the grid
-    :param grid: given grid
-    :return: number of rows and columns
-    """
-    n_rows = len(grid)
-    n_cols = len(grid[0])
-    return n_rows, n_cols
-
-
-def get_squares(grid, n_sub_rows, n_sub_cols):
-    """
-    The "get_squares" function divides the grid in equally-sized squares
-    :param grid: given grid
-    :param n_sub_rows: row dimension of the grid
-    :param n_sub_cols: column dimension of the grid
-    :return: list where each sublist represents one square in the grid
-    """
-    # The number of columns and rows is defined.
-    n_rows, n_cols = find_n_rows_cols(grid)
-    squares = []
-
-    # The anchor points for the rows and columns are calculated.
-    row_split = split_into_squares(n_sub_rows, n_rows)
-    col_split = split_into_squares(n_sub_cols, n_cols)
-
-    # The nested loop below forms squares by adding a certain number to an anchor positions of the grid.
-    for row in row_split:
-        for col in col_split:
-            square = []
-            # The maximum number being added to an anchor position depends on the width of a square in the grid. The
-            # loop picks one row first and then goes through all the column values in that row.
-            for i in range(n_rows // n_sub_rows):
-                for j in range(n_cols // n_sub_cols):
-                    square.append(grid[row + i][col + j])
-            squares.append(square)
-
-    return squares
 
 
 def check_solution(grid, n_sub_rows, n_sub_cols):
@@ -594,4 +526,3 @@ if __name__ == "__main__":
     args: dict = vars(parser.parse_args())
 
     print(main(args))
-
