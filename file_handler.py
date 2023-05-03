@@ -21,10 +21,10 @@ def read_grid_from_file(file_name: str) -> list:
 
     # if the grid is a 6x6, slightly different procedure. subgrids are now 3x2 rectangles instead of squares.
     elif grid_dims_y == 6:
-        subgrid_dims_x = 2
-        subgrid_dims_y = 3
+        subgrid_dims_y = 2
+        subgrid_dims_x = 3
 
-    return (grid, subgrid_dims_y, subgrid_dims_x)
+    return (grid, subgrid_dims_x, subgrid_dims_y)
 
 
 def print_grid(grid: list, **kwargs) -> str:
