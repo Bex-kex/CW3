@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 def generate_hints(unsolved: list, solved: list, hintnum: int) -> list:
     """
     this function will take the completely solved grid, and remove some of the elements of the

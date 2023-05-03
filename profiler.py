@@ -1,8 +1,10 @@
 import os
 import time
 import csv
+import numpy as np
 from pathlib import Path
 import matplotlib.pyplot as plt
+from copy import deepcopy
 import main
 
 
@@ -20,11 +22,11 @@ class Profiler():
         inside it for storing the grids and the output graphs to.
         """
         print(args)
-        self.source_dir: str   = args['sourceDirectory'].pop() if args['sourceDirectory'] else None
-        self.sample_size: int = args['sampleSize'] if args['sampleSize'] else None
-        self.display_mode: int = args['displayMode'] if args['displayMode'] else None
-        self.csv_path: str     = args['csvPath'].pop() if args['csvPath'] else None
-        self.graph_path: str   = args['graphPath'].pop() if args['graphPath'] else None
+        self.source_dir: str   = args['sourceDirectory'].pop()
+        self.sample_size: int = args['sampleSize'].pop()
+        self.display_mode: int = args['displayMode']
+        self.csv_path: str     = args['csvPath'].pop() 
+        self.graph_path: str   = args['graphPath'].pop() 
 
         self.timings: dict = {}
         self.solve = main.main
@@ -50,7 +52,7 @@ class Profiler():
             #go through each filename and solve
             start_time = time.time()
             #the actual solving part \/\/
-            print(self.solve({'file_provided':i}))
+            print(self.solve({'file_provided':i,'solverChoice':'wavefront'}))
             time_taken = time.time()-start_time
             timing_list.append([i[0],time_taken])
         return timing_list
@@ -90,12 +92,58 @@ class Profiler():
         return timings
 
     def write_to_csv(self) -> str:
-        temp_list = [i.insert(0,list(self.timings.keys())[ind]) for ind,i in enumerate(self.timings.values())]
-        print(temp_list)
+        temp_list = []
+        copied_dict = deepcopy(self.timings)
+        for ind,i in enumerate(copied_dict.values()):
+            key = list(copied_dict.keys())[ind]
+            values = i
+            values.insert(0,key)
+            temp_list.append(values)
+
+        temp_list = list(np.array(temp_list).transpose())
+        temp_list = [list(i) for i in temp_list]
+        temp_list[0].insert(0,'pass_number')
+
+        for ind,i in enumerate(temp_list[1:]):
+            i.insert(0,str(ind+1))
+        try:
+            with open(self.csv_path,'w',newline='') as file:
+                writer = csv.writer(file)
+                
+                writer.writerows(temp_list)
+        except OSError:
+            return 'Write unable to complete! moving on...'
+
+        
         return f'Write completed succesfully! csv is located in {self.csv_path}'
 
+    def display_graph(self):
+        data = self.timings
+        match self.display_mode:
+            case 1:
+                fig,axs = plt.subplots(1,len(data.keys()))
+                data_list = list(data.values())
 
+                label_list = list(data.keys())
+                fig.suptitle(f'Box plot of solver performance for each grid in "{self.source_dir}"')
+                fig.supxlabel('Grid path')
+                fig.supylabel('Time to solve (ms)')
+                for ind,i in enumerate(axs):
 
+                    i: plt.Axes
+                    data_list_ms = [round(i*1000,2)for i in data_list[ind]]
+                    i.boxplot(data_list_ms,showmeans=True)
+                    i.set_xlabel(label_list[ind])
+                plt.show()
+            case 2:...
+            case 3:...
+            case 4:...
+            case 5:...
+        if self.graph_path:
+            plt.savefig(self.graph_path,dpi=900)
+            return f'Graph saved to {self.graph_path}!'
+        else:
+            return
 def profilinghandler(args: dict):
     """
     main entry point for the profiler sub-program.
@@ -104,27 +152,22 @@ def profilinghandler(args: dict):
     being a standalone function.
     """
     #create profiler object
-    
+
     profiler = Profiler(args)
 
-    
     print('STARTING PROFILING...')
     #delay, get ready for terminal spam!
     print('---------------------------------------')
-    time.sleep(0.5) 
-    # integer arg is amount of times to run over the list of grids.
-    dict_of_results:dict = profiler.start_profiling()
-    if profiler.csv_path:
-        profiler.write_to_csv()
-
-    #profiler.display_graph()
-    
-    fig, ax = plt.subplots()
-    ax.boxplot(dict_of_results.values(),labels=dict_of_results.keys())
-    print(f'Profiling done! output saved to {profiler.output_path}')
     time.sleep(0.5)
-    print('Showing graph...')
-    plt.show()
+    # integer arg is amount of times to run over the list of grids.
+    profiler.start_profiling()
+
+    if profiler.csv_path:
+        print(profiler.write_to_csv())
+
+    profiler.display_graph()
+
+
     return 'Finished execution! graphing and data export complete.'
 
 
