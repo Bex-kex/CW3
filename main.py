@@ -210,10 +210,10 @@ def main(cmdlineargs: dict):
 
 
 if __name__ == "__main__":
-
+    #Adding arguments to the main parser.
     parser = argparse.ArgumentParser(description="Solve a Sudoku grid from a text file, \
             with additional options such as profiling and explaining the solution")
-    
+    #Making a subparser for profiling-mode.
     profiling_subparser = parser.add_subparsers(description=
             'Assess the performance of the solving algorithm across many grids and many attempts. \
             use "main.py profiling -h/--help" for help on profiling-specific arguments',dest='doProfiling',title='Profiling')
