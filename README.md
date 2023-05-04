@@ -1,4 +1,4 @@
-﻿# Read-me
+﻿# README
 ## To Run:
 
   Run **"python main.py"**  in the source directory, with or without any of the optional flags listed below.
