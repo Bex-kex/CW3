@@ -243,7 +243,7 @@ if __name__ == "__main__":
     
     profiling.add_argument("--display",dest='displayMode',  
             help='which graph preset mode you want the program to display. there are 5 different display modes',
-            action ='extend',choices = [i for i in range(1,6)],nargs= 1,type=int,default=1)
+            action ='store',choices = [i for i in range(1,6)],nargs= 1,type=int,default=[1])
     
     profiling.add_argument("--samplesize",dest='sampleSize',
             help='how many times to loop through the directory containing the grids. \
