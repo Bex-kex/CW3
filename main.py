@@ -143,7 +143,7 @@ def main(cmdlineargs: dict):
     hint: int        =  int(cmdlineargs.get('doHint')[0]) if cmdlineargs.get('doHint') else None
     explain: bool    =  cmdlineargs.get('doExplain') if cmdlineargs.get('doExplain') else False
     profile_mode     =  cmdlineargs.get('doProfiling') if cmdlineargs.get('doProfiling') else None
-    solver_choice    =  cmdlineargs.get('solverChoice')
+    solver_choice    =  cmdlineargs.get('solverChoice').pop() if type(cmdlineargs.get('solverChoice')) == list else cmdlineargs.get('solverChoice')
 
     steps=[]
     if profile_mode:
@@ -157,14 +157,14 @@ def main(cmdlineargs: dict):
         print(f'Reading grid from {file_in}...')
         grid: tuple = file_handler.read_grid_from_file(file_in)
         unsolved = deepcopy(grid[0])
-        solution = solve(solver_choice,*grid,explain=explain,steps=steps)
+        solution,explain = solve(solver_choice,*grid,explain=explain,steps=steps)
 
     else:
 
         #if no input file has been provided, just default to a built-in sudoku
         print('WARNING: invalid/none input file has been provided, defaulting to built in grid.')
         unsolved = deepcopy(easy3)
-        solution = solve(solver_choice,easy3,3,2,explain,steps)
+        solution,explain = solve(solver_choice,easy3,2,3,explain,steps)
         
     if hint:
         #If hints are toggled on
@@ -198,7 +198,7 @@ def main(cmdlineargs: dict):
                 return file_handler.write_grid_to_file(solution,file_out,explainstring=explanation)
             else:
                 #if explanation, no hints and no in/out file
-                return file_handler.print_grid(solution,explanation=explanation)
+                return file_handler.print_grid(solution,explainstring=explanation)
         else:
             if file_out:
                 return file_handler.write_grid_to_file(solution,file_out)

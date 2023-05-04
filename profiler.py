@@ -27,7 +27,6 @@ class Profiler():
         self.display_mode: int = args['displayMode']
         self.csv_path: str     = args['csvPath'].pop() 
         self.graph_path: str   = args['graphPath'].pop() 
-
         self.timings: dict = {}
         self.solve = main.main
         self.output_path = Path(self.source_dir+'\\output')
@@ -47,15 +46,20 @@ class Profiler():
         the time taken in the form of a nested list, with the filenames added to keep track
         of which timing is which.
         """
-        timing_list = []
+        timing_list_wavefront = []
+        timing_list_recursive = []
         for i in list_of_paths:
             #go through each filename and solve
             start_time = time.time()
             #the actual solving part \/\/
             print(self.solve({'file_provided':i,'solverChoice':'wavefront'}))
             time_taken = time.time()-start_time
-            timing_list.append([i[0],time_taken])
-        return timing_list
+            timing_list_wavefront.append([i[0],time_taken])
+            start_time = time.time()
+            print(self.solve({'file_provided':i,'solverChoice':'recursive'}))
+            time_taken = time.time() - start_time
+            timing_list_recursive.append([i[0],time_taken])
+        return timing_list_wavefront, timing_list_recursive
 
     def start_profiling(self) -> dict:
         """
@@ -73,9 +77,9 @@ class Profiler():
             i in [j for j in os.listdir(self.source_dir) if j != 'output']
                          ]
 
-        timings = {filename[0]:[]for filename in list_of_paths} #creating empty dict of the results
-        #dict will have filenams as keys, and temporarily an empty list as a placeholder value
-
+        dict_wavefront = {filename[0]:[] for filename in list_of_paths} #creating empty dict of the results
+        #dict will have filenames as keys, and temporarily an empty list as a placeholder value
+        dict_recursive = deepcopy(dict_wavefront)
         annoyingly_huge_list = []
         #program will spend most of its execution time on this loop.
         #runs each solver x times according to value in range()
@@ -83,34 +87,45 @@ class Profiler():
             print('\n----------------------------------')
             print(f'\tPASS {i+1}:')
             print('----------------------------------\n')
-            annoyingly_huge_list.append(self.single_pass(list_of_paths))
+            wavefront_timings,recursive_timings = self.single_pass(list_of_paths)
+            for i in wavefront_timings:
+                dict_wavefront[i[0]].append(i[1])
+            
+            for j in recursive_timings:
+                dict_recursive[j[0]].append(j[1])
 
-        for i in annoyingly_huge_list:
-            for j in i:
-                timings[j[0]].append(j[1])
-        self.timings = timings
-        return timings
+
+        self.wavefront_results = dict_wavefront
+        self.recursive_results = dict_recursive    
+        
+        return dict_wavefront,dict_recursive
 
     def write_to_csv(self) -> str:
-        temp_list = []
-        copied_dict = deepcopy(self.timings)
-        for ind,i in enumerate(copied_dict.values()):
-            key = list(copied_dict.keys())[ind]
-            values = i
-            values.insert(0,key)
-            temp_list.append(values)
+        recursive_results = []
+        wavefront_results = []
+        copied_wavefront = deepcopy(self.wavefront_results)
+        copied_recursive = deepcopy(self.recursive_results)
+        for i in list(copied_wavefront.keys()):
+            tmp_list = [str(j)for j in copied_wavefront[i]]
+            tmp_list.insert(0,i)
+            wavefront_results.append(tmp_list)
 
-        temp_list = list(np.array(temp_list).transpose())
-        temp_list = [list(i) for i in temp_list]
-        temp_list[0].insert(0,'pass_number')
+        for j in list(copied_recursive.keys()):
+            tmp_list = [str(k) for k in copied_recursive[j]]
+            tmp_list.insert(0,j)
+            recursive_results.append(tmp_list)
 
-        for ind,i in enumerate(temp_list[1:]):
-            i.insert(0,str(ind+1))
+        header = ['pass '+ str(i) for i in range(1,self.sample_size+1)]
+        header.insert(0,'File Path')
         try:
             with open(self.csv_path,'w',newline='') as file:
                 writer = csv.writer(file)
-                
-                writer.writerows(temp_list)
+                writer.writerow(["WAVEFRONT MODE"])
+                writer.writerow(header)
+                writer.writerows(wavefront_results)
+                writer.writerow(["RECURSIVE MODE"])
+                writer.writerow(header)
+                writer.writerows(recursive_results)
         except OSError:
             return 'Write unable to complete! moving on...'
 
@@ -118,22 +133,43 @@ class Profiler():
         return f'Write completed succesfully! csv is located in {self.csv_path}'
 
     def display_graph(self):
-        data = self.timings
+        data1,data2 = deepcopy(self.wavefront_results), deepcopy(self.recursive_results)
+        
         match self.display_mode:
             case 1:
-                fig,axs = plt.subplots(1,len(data.keys()))
-                data_list = list(data.values())
+                def create_average(data_dict: dict):
+                    for i in list(data_dict.keys()):
+                        list_to_average = data_dict[i]
+                        average = sum(list_to_average)/len(list_to_average)
+                        data_dict[i] = average
+                    return data_dict
+        
+                data1 = create_average(data1)
+                data2 = create_average(data2)
+                fig,ax = plt.subplots()
+                width = 0.4
+                data1_x = [x-0.5*width for x in range(len(list(data1.keys())))]
+                data2_x = [x+0.5*width for x in range(len(list(data2.keys())))]
+                data1_y = [y*1000 for y in list(data1.values())]
+                data2_y = [y*1000 for y in list(data2.values())]
 
-                label_list = list(data.keys())
-                fig.suptitle(f'Box plot of solver performance for each grid in "{self.source_dir}"')
-                fig.supxlabel('Grid path')
-                fig.supylabel('Time to solve (ms)')
-                for ind,i in enumerate(axs):
+                max_y_value = max(data1_y) if max(data1_y) > max(data2_y) else max(data2_y)
+                
 
-                    i: plt.Axes
-                    data_list_ms = [round(i*1000,2)for i in data_list[ind]]
-                    i.boxplot(data_list_ms,showmeans=True)
-                    i.set_xlabel(label_list[ind])
+                label_list = list(data1.keys())
+                ax.set_xticks([x for x in range(len(list(data1.keys())))],label_list)
+                
+                max_y_value = int((max_y_value // 100 * 100) + 200)
+                
+                
+                ax.bar(data1_x,data1_y,width,label='Wavefront Algorithm')
+                ax.bar(data2_x,data2_y,width,label='Recursive Algorithm')
+                ax.set_yticks([y for y in range(0,max_y_value,100)])
+
+                ax.set_ylabel('Time to solve(ms)')
+                ax.set_xlabel('Grid path')
+                ax.set_title(f'Average solving time of grids in "{self.source_dir}" for different solving algorithms.')
+                ax.legend()
                 plt.show()
             case 2:...
             case 3:...

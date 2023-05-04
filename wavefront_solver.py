@@ -274,7 +274,10 @@ def solve(grid: list, n_sub_rows: int, n_sub_cols: int, explain: bool = None, st
     # if the grid is full already, the if statement checks it through the game requirements.
     if not zeros:
         if check_solution(grid, n_sub_rows, n_sub_cols):
-            return grid
+            if explain: 
+                return grid,steps
+            else:
+                return grid,None
 
     # We define the coordinates of the zero.
     row, col = zeros[0][0], zeros[0][1]

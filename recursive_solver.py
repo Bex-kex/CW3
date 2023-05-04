@@ -4,13 +4,15 @@ from typing import Tuple
 
 sudokuboard = list[list[int]]
 class SudokuBoard:
-    def __init__(self,grid,subgrid_dims_y,subgrid_dims_x):
+    def __init__(self,grid,subgrid_dims_y,subgrid_dims_x,explain,steps):
         self.grid = grid
         self.subgrid_dims_y = subgrid_dims_y
         self.subgrid_dims_x = subgrid_dims_x
         self.main_grid_dims = self.subgrid_dims_y*self.subgrid_dims_x
         self.row_list, self.column_list = self.create_lists()
         self.square_list, self.hashmap = self.create_hashmap()
+        self.explain = explain
+        self.steps = steps
     def create_hashmap(self) -> Tuple[sudokuboard,list[list[str]]]:
         
         #creating a grid of zeros of same size as the grid
@@ -136,7 +138,7 @@ class SudokuBoard:
         y_sq, x_sq = self.lookup_hashmap(y,x)
         self.square_list[y_sq][x_sq] = value
 
-    def solve(self) -> sudokuboard:
+    def recurse(self) -> sudokuboard:
         next_zero = self.get_next_zero()
         
         
@@ -147,18 +149,27 @@ class SudokuBoard:
         for i in possibilties:
             self.grid[y][x] = i
             self.update_lists(y,x,i)
-
-            ans = self.solve()
+            if self.explain and self.steps is not None:
+                self.steps.append(f"Place value {i} in position {y, x}")
+            ans = self.recurse()
             if ans:
                 return ans
-            
+            if self.explain and self.steps is not None:
+                self.steps.pop()
             self.grid[y][x] = 0
             self.update_lists(y,x,0)
         
         return None
 
         
+def solve(grid,n_sub_rows,n_sub_cols,explain=None,steps=None) -> sudokuboard:
+    board_to_solve = SudokuBoard(grid,n_sub_rows,n_sub_cols,explain,steps)
+    solution = board_to_solve.recurse()
     
+    if explain and steps is not None:
+        return solution,board_to_solve.steps
+    else:
+        return solution,None
 
 
 
@@ -184,5 +195,5 @@ if __name__ == '__main__':
     [0, 3, 1, 0, 0, 8, 0, 5, 7]
     ]
     board = SudokuBoard(testlist9x9,3,3)
-    solution = board.solve()
+    solution = board.recurse()
     for i in solution:print(i)
