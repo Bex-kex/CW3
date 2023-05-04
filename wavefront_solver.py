@@ -53,13 +53,20 @@ def bubble_sort(any_list: list) -> list:
     :param any_list: given list
     :return: sorted list
     """
-    length = len(any_list)
-    for i in range(0, length):
-        for j in range(0, length - i - 1):
-            if any_list[j][2] > any_list[j + 1][2]:
-                buffer = any_list[j]
-                any_list[j] = any_list[j + 1]
-                any_list[j + 1] = buffer
+    
+    
+    any_list.sort(key=lambda a: a[2])
+    
+    
+    # length = len(any_list)
+    # for i in range(0, length):
+    #     for j in range(0, length - i - 1):
+    #         if any_list[j][2] > any_list[j + 1][2]:
+    #             buffer = any_list[j]
+    #             any_list[j] = any_list[j + 1]
+    #             any_list[j + 1] = buffer
+    
+    
 
     return any_list
 

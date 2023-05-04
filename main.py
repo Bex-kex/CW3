@@ -95,7 +95,7 @@ def generate_hints(unsolved: list,solved: list,hintnum: int) -> list:
         for ind2,j in enumerate(i):
             #if the unsolved grid is different from the solved grid (i.e. a cell filled by the solver)
             #and the number of hints required has not been reached, add it to the partially solved grid.
-            if not(j == unsolved[ind][ind2]) and counter <= hintnum:
+            if not(j == unsolved[ind][ind2]) and counter < hintnum:
                 partially_solved[ind][ind2] = solved[ind][ind2]
                 counter += 1
 
@@ -129,6 +129,7 @@ def write_explanation(unsolved: list,solved: list) -> list[str]:
         for ind_x, j in enumerate(i):
             if not unsolved[ind_y][ind_x] == j:
                 finalstr.append(f'Place value {j} in position{ind_y,ind_x}')
+    
     return finalstr
 
 def main(cmdlineargs: dict):
