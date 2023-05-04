@@ -212,9 +212,10 @@ def find_empty(grid: int, n_sub_rows: int, n_sub_cols: int) -> list:
 
     # The zeros are sorted from the easiest to the hardest to solve based on the number of possible values (third
     # element in the sub-list).
-    zeros_sorted = bubble_sort(zeros_outer)
+    zeros_outer.sort(key=lambda a: a[2])
+    
 
-    return zeros_sorted
+    return zeros_outer
 
 
 def check_solution(grid, n_sub_rows, n_sub_cols):
