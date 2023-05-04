@@ -13,6 +13,7 @@ class SudokuBoard:
         self.square_list, self.hashmap = self.create_hashmap()
         self.explain = explain
         self.steps = steps
+
     def create_hashmap(self) -> Tuple[sudokuboard,list[list[str]]]:
         
         #creating a grid of zeros of same size as the grid
@@ -36,9 +37,6 @@ class SudokuBoard:
                 # Where x is the anchor point for each subgrid, every other value in the subgrid(the 'o's) can be accessed by using
                 # the co-ordinate of the anchor point + the offset in both x and y dimensions.
 
-                
-                
-
                 little_list = []
                 index_number = 0
                 for offset_y in range(0,self.subgrid_dims_y):
@@ -53,9 +51,9 @@ class SudokuBoard:
                         
                         index_number += 1
 
-                
                 square_list.append(little_list)
                 list_number += 1
+                
         return (square_list,lookup)
 
 
@@ -145,17 +143,22 @@ class SudokuBoard:
         if not next_zero:
             if self.check_solution():
                 return self.grid
+            
         x,y,possibilties = [next_zero[i] for i in next_zero.keys()]
+
         for i in possibilties:
             self.grid[y][x] = i
             self.update_lists(y,x,i)
             if self.explain and self.steps is not None:
                 self.steps.append(f"Place value {i} in position {y, x}")
             ans = self.recurse()
+
             if ans:
                 return ans
+            
             if self.explain and self.steps is not None:
                 self.steps.pop()
+
             self.grid[y][x] = 0
             self.update_lists(y,x,0)
         
@@ -173,27 +176,3 @@ def solve(grid,n_sub_rows,n_sub_cols,explain=None,steps=None) -> sudokuboard:
 
 
 
-if __name__ == '__main__':
-    testlist6x6 = [
-    [0, 3, 0, 4, 0, 0],
-    [0, 0, 5, 6, 0, 3],
-    [0, 0, 0, 1, 0, 0],
-    [0, 1, 0, 3, 0, 5],
-    [0, 6, 4, 0, 3, 1],
-    [0, 0, 1, 0, 4, 6]
-    ]
-    
-    testlist9x9 = [
-    [0, 2, 0, 0, 0, 0, 0, 1, 0],
-    [0, 0, 6, 0, 4, 0, 0, 0, 0],
-    [5, 8, 0, 0, 9, 0, 0, 0, 3],
-    [0, 0, 0, 0, 0, 3, 0, 0, 4],
-    [4, 1, 0, 0, 8, 0, 6, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 9, 5],
-    [2, 0, 0, 0, 1, 0, 0, 8, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 3, 1, 0, 0, 8, 0, 5, 7]
-    ]
-    board = SudokuBoard(testlist9x9,3,3)
-    solution = board.recurse()
-    for i in solution:print(i)
