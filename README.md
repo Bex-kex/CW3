@@ -3,6 +3,10 @@
 
   Run **"python main.py"**  in the source directory, with or without any of the optional flags listed below.
 As this program uses the Argparse module, all help on flags is also present in the command line. Simply add **-h** or **--help** to the command-line arguments when running the program.
+** TO CHECK TASK 1 **
+to check the solver for task 1, use the flag --solver recursive, in order to select the solver that has been written according to task 1.
+** TO CHECK TASK 3 **
+the default solving algorithm it 'wavefront', which is the solver completed in task 3. However you can force use it by using **--solver wavefront**
   ## Flags:
   
 
