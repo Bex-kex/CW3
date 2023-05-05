@@ -108,7 +108,7 @@ def generate_hints(unsolved: list,solved: list,hintnum: int) -> list:
 def solve(solver_choice,grid,n_sub_cols,n_sub_rows,explain=None,steps=None) -> list[list[int]]:
     match solver_choice:
         case 'wavefront':
-            return wavefront_solver.solve(grid,n_sub_cols,n_sub_rows,explain,steps)
+            return wavefront_solver.solve(grid,n_sub_rows,n_sub_cols,explain,steps)
         case 'recursive':
             return recursive_solver.solve(grid,n_sub_rows,n_sub_cols,explain,steps)
         

@@ -298,7 +298,7 @@ def solve(grid: list, n_sub_rows: int, n_sub_cols: int, explain: bool = None, st
 
         if explain and steps is not None:
             steps.append(f"Place value {i} in position {row, col}")
-        ans = solve(grid, n_sub_rows, n_sub_cols)
+        ans = solve(grid, n_sub_rows, n_sub_cols,explain,steps)
         # This if statement is only true once the bottom of the recursion depth has been reached AND
         # the grid is solved. basically just passes the grid back up the stack.
         if ans:

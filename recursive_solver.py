@@ -322,7 +322,7 @@ def solve(grid,n_sub_rows,n_sub_cols,explain=None,steps=None) -> sudokuboard:
     and/or the explanation.
     """
     #create SudokuBoard object
-    board_to_solve = SudokuBoard(grid,n_sub_rows,n_sub_cols,explain,steps)
+    board_to_solve = SudokuBoard(grid,n_sub_cols,n_sub_rows,explain,steps)
     #calling the actual solve method and storing the result as solution.
     solution = board_to_solve.recurse()
     
